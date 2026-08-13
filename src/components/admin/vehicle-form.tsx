@@ -1,0 +1,647 @@
+"use client";
+
+import { useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { FileText, Loader2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ImageUploader, type UploadedImage } from "@/components/admin/image-uploader";
+import { createVehicleAction, updateVehicleAction } from "@/lib/vehicles/actions";
+import type { VehicleInput } from "@/lib/validation/vehicle";
+import {
+  BODY_TYPES,
+  CATEGORY_OPTIONS,
+  DRIVETRAINS,
+  FEATURE_OPTIONS,
+  FUEL_TYPES,
+  STATUS_OPTIONS,
+  TRANSMISSIONS,
+  type VehicleCategory,
+  type VehicleStatus,
+} from "@/lib/vehicles/constants";
+
+type FormState = {
+  brand: string;
+  model: string;
+  year: string;
+  mileage: string;
+  price: string;
+  category: VehicleCategory | "";
+  engine: string;
+  engineDisplacement: string;
+  enginePower: string;
+  fuelType: string;
+  transmission: string;
+  drivetrain: string;
+  bodyType: string;
+  color: string;
+  doorCount: string;
+  description: string;
+  status: VehicleStatus;
+  isFeatured: boolean;
+  engineCondition: string;
+  transmissionCondition: string;
+  bodyCondition: string;
+  paintCondition: string;
+  changedParts: string;
+  damageStatus: "yok" | "var";
+  damageInfo: string;
+  expertiseReportUrl: string;
+  features: string[];
+  images: UploadedImage[];
+};
+
+const EMPTY_STATE: FormState = {
+  brand: "",
+  model: "",
+  year: String(new Date().getFullYear()),
+  mileage: "",
+  price: "",
+  category: "",
+  engine: "",
+  engineDisplacement: "",
+  enginePower: "",
+  fuelType: "",
+  transmission: "",
+  drivetrain: "",
+  bodyType: "",
+  color: "",
+  doorCount: "",
+  description: "",
+  status: "satista",
+  isFeatured: false,
+  engineCondition: "",
+  transmissionCondition: "",
+  bodyCondition: "",
+  paintCondition: "",
+  changedParts: "",
+  damageStatus: "yok",
+  damageInfo: "",
+  expertiseReportUrl: "",
+  features: [],
+  images: [],
+};
+
+function selectClassName() {
+  return "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+}
+
+export function VehicleForm({
+  vehicleId,
+  defaultValues,
+}: {
+  vehicleId?: number;
+  defaultValues?: Partial<FormState>;
+}) {
+  const router = useRouter();
+  const [values, setValues] = useState<FormState>({
+    ...EMPTY_STATE,
+    ...defaultValues,
+  });
+  const [customFeature, setCustomFeature] = useState("");
+  const [pending, startTransition] = useTransition();
+  const [uploadingReport, setUploadingReport] = useState(false);
+  const reportInputRef = useRef<HTMLInputElement>(null);
+
+  function update<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setValues((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function toggleFeature(label: string) {
+    setValues((prev) => ({
+      ...prev,
+      features: prev.features.includes(label)
+        ? prev.features.filter((f) => f !== label)
+        : [...prev.features, label],
+    }));
+  }
+
+  function addCustomFeature() {
+    const label = customFeature.trim();
+    if (!label || values.features.includes(label)) return;
+    update("features", [...values.features, label]);
+    setCustomFeature("");
+  }
+
+  async function handleReportUpload(file: File | undefined) {
+    if (!file) return;
+    setUploadingReport(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("kind", "document");
+      formData.append("folder", "expertise-reports");
+      const res = await fetch("/api/uploads", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Yükleme başarısız");
+      update("expertiseReportUrl", data.url as string);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Yükleme başarısız");
+    } finally {
+      setUploadingReport(false);
+      if (reportInputRef.current) reportInputRef.current.value = "";
+    }
+  }
+
+  function validate(): string | null {
+    if (!values.brand.trim()) return "Marka zorunludur.";
+    if (!values.model.trim()) return "Model zorunludur.";
+    if (!values.category) return "Kategori seçiniz.";
+    if (!values.year || Number.isNaN(Number(values.year))) return "Model yılı geçersiz.";
+    if (!values.mileage || Number.isNaN(Number(values.mileage)))
+      return "Kilometre geçersiz.";
+    if (!values.price || Number.isNaN(Number(values.price))) return "Fiyat geçersiz.";
+    if (values.images.length === 0) return "En az 1 fotoğraf ekleyin.";
+    return null;
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const error = validate();
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    const nullIfEmpty = (value: string) => (value.trim() ? value.trim() : null);
+
+    const input: VehicleInput = {
+      brand: values.brand.trim(),
+      model: values.model.trim(),
+      year: Number(values.year),
+      mileage: Number(values.mileage),
+      price: Number(values.price),
+      category: values.category as VehicleCategory,
+      engine: nullIfEmpty(values.engine),
+      engineDisplacement: nullIfEmpty(values.engineDisplacement),
+      enginePower: nullIfEmpty(values.enginePower),
+      fuelType: nullIfEmpty(values.fuelType),
+      transmission: nullIfEmpty(values.transmission),
+      drivetrain: nullIfEmpty(values.drivetrain),
+      bodyType: nullIfEmpty(values.bodyType),
+      color: nullIfEmpty(values.color),
+      doorCount: values.doorCount ? Number(values.doorCount) : null,
+      description: nullIfEmpty(values.description),
+      status: values.status,
+      isFeatured: values.isFeatured,
+      engineCondition: nullIfEmpty(values.engineCondition),
+      transmissionCondition: nullIfEmpty(values.transmissionCondition),
+      bodyCondition: nullIfEmpty(values.bodyCondition),
+      paintCondition: nullIfEmpty(values.paintCondition),
+      changedParts: nullIfEmpty(values.changedParts),
+      damageStatus: values.damageStatus,
+      damageInfo: nullIfEmpty(values.damageInfo),
+      expertiseReportUrl: nullIfEmpty(values.expertiseReportUrl),
+      features: values.features,
+      images: values.images.map((image) => ({
+        url: image.url,
+        altText: image.altText || null,
+      })),
+    };
+
+    startTransition(async () => {
+      try {
+        if (vehicleId) {
+          await updateVehicleAction(vehicleId, input);
+        } else {
+          await createVehicleAction(input);
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
+        toast.error("Kaydedilirken bir hata oluştu.");
+      }
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-10">
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Temel Bilgiler
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="brand">Marka *</Label>
+            <Input
+              id="brand"
+              value={values.brand}
+              onChange={(e) => update("brand", e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="model">Model *</Label>
+            <Input
+              id="model"
+              value={values.model}
+              onChange={(e) => update("model", e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="category">Kategori *</Label>
+            <select
+              id="category"
+              className={selectClassName()}
+              value={values.category}
+              onChange={(e) => update("category", e.target.value as VehicleCategory)}
+              required
+            >
+              <option value="">Seçiniz</option>
+              {CATEGORY_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="year">Model Yılı *</Label>
+            <Input
+              id="year"
+              type="number"
+              value={values.year}
+              onChange={(e) => update("year", e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="mileage">Kilometre *</Label>
+            <Input
+              id="mileage"
+              type="number"
+              value={values.mileage}
+              onChange={(e) => update("mileage", e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="price">Fiyat (TL) *</Label>
+            <Input
+              id="price"
+              type="number"
+              value={values.price}
+              onChange={(e) => update("price", e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="status">Stok Durumu *</Label>
+            <select
+              id="status"
+              className={selectClassName()}
+              value={values.status}
+              onChange={(e) => update("status", e.target.value as VehicleStatus)}
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <label className="flex items-center gap-2 pt-6 text-sm font-medium">
+            <input
+              type="checkbox"
+              checked={values.isFeatured}
+              onChange={(e) => update("isFeatured", e.target.checked)}
+              className="h-4 w-4 rounded border-input"
+            />
+            Öne çıkan araç olarak göster
+          </label>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="description">Açıklama</Label>
+          <Textarea
+            id="description"
+            rows={4}
+            value={values.description}
+            onChange={(e) => update("description", e.target.value)}
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Teknik Özellikler
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="engine">Motor</Label>
+            <Input
+              id="engine"
+              value={values.engine}
+              onChange={(e) => update("engine", e.target.value)}
+              placeholder="Örn. 2.4 Dizel"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="engineDisplacement">Motor Hacmi</Label>
+            <Input
+              id="engineDisplacement"
+              value={values.engineDisplacement}
+              onChange={(e) => update("engineDisplacement", e.target.value)}
+              placeholder="Örn. 2393 cc"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="enginePower">Motor Gücü</Label>
+            <Input
+              id="enginePower"
+              value={values.enginePower}
+              onChange={(e) => update("enginePower", e.target.value)}
+              placeholder="Örn. 150 hp"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="fuelType">Yakıt Tipi</Label>
+            <select
+              id="fuelType"
+              className={selectClassName()}
+              value={values.fuelType}
+              onChange={(e) => update("fuelType", e.target.value)}
+            >
+              <option value="">Seçiniz</option>
+              {FUEL_TYPES.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="transmission">Şanzıman</Label>
+            <select
+              id="transmission"
+              className={selectClassName()}
+              value={values.transmission}
+              onChange={(e) => update("transmission", e.target.value)}
+            >
+              <option value="">Seçiniz</option>
+              {TRANSMISSIONS.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="drivetrain">Çekiş</Label>
+            <select
+              id="drivetrain"
+              className={selectClassName()}
+              value={values.drivetrain}
+              onChange={(e) => update("drivetrain", e.target.value)}
+            >
+              <option value="">Seçiniz</option>
+              {DRIVETRAINS.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="bodyType">Kasa Tipi</Label>
+            <select
+              id="bodyType"
+              className={selectClassName()}
+              value={values.bodyType}
+              onChange={(e) => update("bodyType", e.target.value)}
+            >
+              <option value="">Seçiniz</option>
+              {BODY_TYPES.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="color">Renk</Label>
+            <Input
+              id="color"
+              value={values.color}
+              onChange={(e) => update("color", e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="doorCount">Kapı Sayısı</Label>
+            <Input
+              id="doorCount"
+              type="number"
+              value={values.doorCount}
+              onChange={(e) => update("doorCount", e.target.value)}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Donanım
+        </h2>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURE_OPTIONS.map((feature) => (
+            <label key={feature} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={values.features.includes(feature)}
+                onChange={() => toggleFeature(feature)}
+                className="h-4 w-4 rounded border-input"
+              />
+              {feature}
+            </label>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2 pt-2">
+          <Input
+            value={customFeature}
+            onChange={(e) => setCustomFeature(e.target.value)}
+            placeholder="Özel donanım ekle"
+            className="max-w-xs"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addCustomFeature();
+              }
+            }}
+          />
+          <Button type="button" variant="outline" size="sm" onClick={addCustomFeature}>
+            Ekle
+          </Button>
+        </div>
+        {values.features.filter((f) => !FEATURE_OPTIONS.includes(f)).length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {values.features
+              .filter((f) => !FEATURE_OPTIONS.includes(f))
+              .map((feature) => (
+                <span
+                  key={feature}
+                  className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs"
+                >
+                  {feature}
+                  <button type="button" onClick={() => toggleFeature(feature)}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Ekspertiz ve Hasar Bilgileri
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="engineCondition">Motor Durumu</Label>
+            <Input
+              id="engineCondition"
+              value={values.engineCondition}
+              onChange={(e) => update("engineCondition", e.target.value)}
+              placeholder="Örn. Sorunsuz"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="transmissionCondition">Şanzıman Durumu</Label>
+            <Input
+              id="transmissionCondition"
+              value={values.transmissionCondition}
+              onChange={(e) => update("transmissionCondition", e.target.value)}
+              placeholder="Örn. Sorunsuz"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="bodyCondition">Kaporta Durumu</Label>
+            <Input
+              id="bodyCondition"
+              value={values.bodyCondition}
+              onChange={(e) => update("bodyCondition", e.target.value)}
+              placeholder="Örn. Orijinal"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="paintCondition">Boya Durumu</Label>
+            <Input
+              id="paintCondition"
+              value={values.paintCondition}
+              onChange={(e) => update("paintCondition", e.target.value)}
+              placeholder="Örn. Orijinal boya"
+            />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="changedParts">Değişen Parçalar</Label>
+          <Textarea
+            id="changedParts"
+            rows={2}
+            value={values.changedParts}
+            onChange={(e) => update("changedParts", e.target.value)}
+            placeholder="Örn. Sağ ön çamurluk"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="damageStatus">Hasar Durumu</Label>
+            <select
+              id="damageStatus"
+              className={selectClassName()}
+              value={values.damageStatus}
+              onChange={(e) => update("damageStatus", e.target.value as "yok" | "var")}
+            >
+              <option value="yok">Hasar Kaydı Yok</option>
+              <option value="var">Hasar Kaydı Mevcut</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="damageInfo">Hasar Açıklaması</Label>
+            <Input
+              id="damageInfo"
+              value={values.damageInfo}
+              onChange={(e) => update("damageInfo", e.target.value)}
+              placeholder="Örn. Sol arka kapı boyalı"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Ekspertiz Raporu (PDF veya görsel)</Label>
+          {values.expertiseReportUrl ? (
+            <div className="flex items-center gap-3 rounded-md border border-border p-3 text-sm">
+              <FileText className="h-4 w-4 shrink-0 text-brand" />
+              <a
+                href={values.expertiseReportUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 truncate underline"
+              >
+                {values.expertiseReportUrl}
+              </a>
+              <button
+                type="button"
+                onClick={() => update("expertiseReportUrl", "")}
+                className="text-muted-foreground hover:text-destructive"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={uploadingReport}
+              onClick={() => reportInputRef.current?.click()}
+            >
+              {uploadingReport ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileText className="h-4 w-4" />
+              )}
+              {uploadingReport ? "Yükleniyor..." : "Rapor Yükle"}
+            </Button>
+          )}
+          <input
+            ref={reportInputRef}
+            type="file"
+            accept="application/pdf,image/*"
+            className="hidden"
+            onChange={(e) => handleReportUpload(e.target.files?.[0])}
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Fotoğraflar *
+        </h2>
+        <ImageUploader
+          images={values.images}
+          onChange={(images) => update("images", images)}
+          folder="vehicles"
+        />
+      </section>
+
+      <div className="flex items-center gap-3">
+        <Button type="submit" size="lg" disabled={pending}>
+          {pending ? "Kaydediliyor..." : vehicleId ? "Değişiklikleri Kaydet" : "Aracı Kaydet"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          onClick={() => router.push("/admin/vehicles")}
+        >
+          Vazgeç
+        </Button>
+      </div>
+    </form>
+  );
+}

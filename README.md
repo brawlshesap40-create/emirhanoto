@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Emirhan Otomotiv
 
-## Getting Started
+36 yıllık tecrübeye sahip Emirhan Otomotiv için geliştirilen araç alım satım platformu. Next.js (App Router) + PostgreSQL (Drizzle ORM) + S3 uyumlu dosya depolama ile gerçek işletme kullanımına uygun olarak inşa edildi.
 
-First, run the development server:
+## Teknoloji
+
+- **Next.js 16** (App Router, TypeScript, Server Actions)
+- **Tailwind CSS v4** + shadcn/ui
+- **PostgreSQL** + **Drizzle ORM**
+- **S3 uyumlu depolama** (local: MinIO, production: AWS S3 / Cloudflare R2 vb.)
+- Özel, hafif oturum (session) tabanlı admin authentication (bcrypt + jose/JWT)
+
+## Local Geliştirme Ortamı
+
+### 1. Gereksinimler
+
+- Node.js 20.9+
+- Docker Desktop (Postgres ve MinIO local'de container olarak çalışır)
+
+### 2. Ortam değişkenleri
+
+```bash
+cp .env.example .env.local
+```
+
+`.env.local` içindeki değerler local Docker Compose servisleriyle uyumludur, olduğu gibi kullanılabilir. Sadece `SESSION_SECRET` değerini kendi ortamınız için değiştirmeniz önerilir (`openssl rand -base64 32`).
+
+### 3. Servisleri başlat
+
+```bash
+docker compose up -d
+```
+
+Bu komut Postgres'i (`localhost:5432`) ve MinIO'yu (`localhost:9000`, konsol: `localhost:9001`) ayağa kaldırır.
+
+### 4. Bağımlılıkları kur
+
+```bash
+npm install
+```
+
+### 5. Veritabanı migration'larını çalıştır
+
+```bash
+npm run db:migrate
+```
+
+### 6. MinIO bucket'ını oluştur (ilk kurulumda bir kez)
+
+```bash
+npx tsx --env-file=.env.local scripts/setup-storage.ts
+```
+
+### 7. Örnek veriyi yükle (admin kullanıcı + 15 demo araç)
+
+```bash
+npm run db:seed
+```
+
+`.env.local` içindeki `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` ile admin panelinde giriş yapabilirsiniz (`/admin/login`).
+
+> Not: Demo araçların gerçek fotoğrafı yoktur (fabrikasyon stok fotoğrafı eklenmedi). Admin panelinden gerçek araç fotoğraflarını yükleyebilirsiniz.
+
+### 8. Geliştirme sunucusunu başlat
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[http://localhost:3000](http://localhost:3000) adresinden siteyi, `/admin/login` adresinden yönetici panelini görüntüleyebilirsiniz.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Kullanışlı Komutlar
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Komut | Açıklama |
+| --- | --- |
+| `npm run dev` | Geliştirme sunucusu |
+| `npm run build` | Production build |
+| `npm run db:generate` | Şema değişikliğinden yeni migration üretir |
+| `npm run db:migrate` | Migration'ları veritabanına uygular |
+| `npm run db:studio` | Drizzle Studio (veritabanı arayüzü) |
+| `npm run db:seed` | Admin kullanıcı + demo araç verisi yükler |
 
-## Learn More
+## Proje Yapısı
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/
+    (public)/          Herkese açık site (anasayfa, araçlarımız, iletişim)
+    admin/              Yönetici paneli (login + araç yönetimi)
+    api/uploads/        Görsel/döküman yükleme endpoint'i
+  components/
+    site/               Header, footer, hero vb. genel bileşenler
+    vehicles/           Araç kartı, galeri, filtre, özellikler
+    admin/              Admin formu, görsel yükleyici, tablo aksiyonları
+    ui/                 shadcn/ui bileşenleri
+  lib/
+    db/                 Drizzle şeması ve client
+    auth/               Oturum yönetimi (jose/JWT), server action'lar
+    storage/            S3 client ve yükleme yardımcıları
+    vehicles/           Sorgular, server action'lar, sabitler
+  proxy.ts              Next.js 16 "proxy" dosyası - /admin/* rota koruması
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Kapsam Durumu (Faz 1)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Tamamlanan: araç kataloğu + filtreleme, 8+ fotoğraflı araç detay sayfası (galeri/lightbox, teknik özellikler, donanım, ekspertiz/hasar bilgileri), admin panelinde araç CRUD + görsel/rapor yükleme + stok durumu yönetimi, admin authentication.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Sonraki fazlar: Test sürüşü / Takas / Araç Değerleme formları + admin "Talepler" paneli, interaktif finansman hesaplama, ileri SEO (sitemap/robots/OG image) ve mobil/performans cilası.
