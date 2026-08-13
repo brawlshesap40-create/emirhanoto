@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { LayoutList, LogOut, PlusCircle, Truck } from "lucide-react";
+import { ClipboardList, LayoutList, LogOut, PlusCircle, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { verifySession } from "@/lib/auth/dal";
 import { logoutAction } from "@/lib/auth/actions";
+import { countNewValuationRequests } from "@/lib/valuation/queries";
 
 export default async function AdminDashboardLayout({
   children,
@@ -10,6 +11,7 @@ export default async function AdminDashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await verifySession();
+  const newValuationCount = await countNewValuationRequests();
 
   return (
     <div className="flex min-h-screen">
@@ -38,6 +40,18 @@ export default async function AdminDashboardLayout({
             <PlusCircle className="h-4 w-4" />
             Yeni Araç Ekle
           </Link>
+          <Link
+            href="/admin/valuation-requests"
+            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+          >
+            <ClipboardList className="h-4 w-4" />
+            Değerleme Talepleri
+            {newValuationCount > 0 && (
+              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-xs font-semibold text-brand-foreground">
+                {newValuationCount}
+              </span>
+            )}
+          </Link>
         </nav>
         <div className="border-t border-border p-3">
           <p className="truncate px-3 text-xs text-muted-foreground">{session.email}</p>
@@ -64,12 +78,15 @@ export default async function AdminDashboardLayout({
               </Button>
             </form>
           </div>
-          <nav className="mt-2 flex gap-4 text-sm">
+          <nav className="mt-2 flex flex-wrap gap-4 text-sm">
             <Link href="/admin/vehicles" className="text-muted-foreground">
               Araçlar
             </Link>
             <Link href="/admin/vehicles/new" className="text-muted-foreground">
               Yeni Araç
+            </Link>
+            <Link href="/admin/valuation-requests" className="text-muted-foreground">
+              Değerleme Talepleri{newValuationCount > 0 && ` (${newValuationCount})`}
             </Link>
           </nav>
         </header>

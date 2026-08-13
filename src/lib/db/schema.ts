@@ -27,6 +27,12 @@ export const vehicleCategoryEnum = pgEnum("vehicle_category", [
 
 export const damageStatusEnum = pgEnum("damage_status", ["yok", "var"]);
 
+export const requestStatusEnum = pgEnum("request_status", [
+  "yeni",
+  "gorusuluyor",
+  "sonuclandi",
+]);
+
 export const adminUsers = pgTable("admin_users", {
   id: serial("id").primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),
@@ -95,6 +101,31 @@ export const vehicleFeatures = pgTable("vehicle_features", {
     .notNull()
     .references(() => vehicles.id, { onDelete: "cascade" }),
   label: varchar("label", { length: 100 }).notNull(),
+});
+
+export const valuationRequests = pgTable("valuation_requests", {
+  id: serial("id").primaryKey(),
+
+  fullName: varchar("full_name", { length: 150 }).notNull(),
+  phone: varchar("phone", { length: 30 }).notNull(),
+  email: varchar("email", { length: 255 }),
+
+  brand: varchar("brand", { length: 100 }).notNull(),
+  model: varchar("model", { length: 100 }).notNull(),
+  year: integer("year").notNull(),
+  mileage: integer("mileage").notNull(),
+  description: text("description"),
+
+  status: requestStatusEnum("status").notNull().default("yeni"),
+  offeredPrice: integer("offered_price"),
+  adminNote: text("admin_note"),
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const vehiclesRelations = relations(vehicles, ({ many }) => ({

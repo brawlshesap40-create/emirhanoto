@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ValuationDialogTrigger } from "@/components/site/valuation-dialog";
 import { siteConfig, buildWhatsAppUrl } from "@/lib/site-config";
 
 const STATS = [
@@ -46,21 +47,13 @@ export function Hero() {
             Araçlarımızı İncele
             <ArrowRight className="h-4 w-4" />
           </Button>
-          <Button
+          <ValuationDialogTrigger
             size="lg"
             variant="outline"
             className="border-background/20 bg-transparent text-background hover:bg-background/10 hover:text-background"
-            nativeButton={false}
-            render={
-              <a
-                href={buildWhatsAppUrl("Merhaba, aracımı değerletmek istiyorum.")}
-                target="_blank"
-                rel="noopener noreferrer"
-              />
-            }
           >
             Aracımı Değerle
-          </Button>
+          </ValuationDialogTrigger>
           <Button
             size="lg"
             variant="ghost"
