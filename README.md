@@ -101,6 +101,42 @@ src/
   proxy.ts              Next.js 16 "proxy" dosyası - /admin/* rota koruması
 ```
 
+## Yayına Alma (Production)
+
+Önerilen yol: **Vercel** (hosting) + **Neon** veya **Supabase** (Postgres) + **Cloudflare R2** (S3 uyumlu görsel/döküman depolama). Kod bu üçlüye hazır yazıldı; local'de MinIO yerine sadece env değişkenleri değişir, kod değişikliği gerekmez.
+
+### 1. GitHub'a push
+
+Vercel bir Git deposundan deploy eder. Projeyi kendi GitHub hesabınızda bir repoya push edin (`git remote add origin ...` + `git push -u origin master`).
+
+### 2. Veritabanı (Neon veya Supabase)
+
+1. [neon.tech](https://neon.tech) veya [supabase.com](https://supabase.com)'da ücretsiz bir proje oluşturun.
+2. Verilen `DATABASE_URL`'i (SSL zorunlu, `?sslmode=require` içerir) not edin.
+3. Local makinenizden bu URL'e karşı migration'ları çalıştırın ve **sadece admin kullanıcıyı** oluşturun (demo araçlar olmadan):
+   ```bash
+   DATABASE_URL="<neon-connection-string>" npx drizzle-kit migrate
+   DATABASE_URL="<neon-connection-string>" SEED_ADMIN_EMAIL="..." SEED_ADMIN_PASSWORD="..." SEED_SKIP_VEHICLES=true npx tsx scripts/seed.ts
+   ```
+
+### 3. Görsel depolama (Cloudflare R2)
+
+1. Cloudflare hesabınızda bir R2 bucket oluşturun (örn. `emirhanoto`).
+2. Bucket için "Public access" açın veya bir custom domain (örn. `cdn.emirhanotomotiv.com`) bağlayın — bu, `S3_PUBLIC_URL` olacak.
+3. R2 API token'ı oluşturun (Access Key ID / Secret) ve bucket'ı local'deki gibi oluşturmak için:
+   ```bash
+   S3_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com" S3_REGION=auto S3_ACCESS_KEY_ID="..." S3_SECRET_ACCESS_KEY="..." S3_BUCKET=emirhanoto S3_FORCE_PATH_STYLE=true npx tsx scripts/setup-storage.ts
+   ```
+
+### 4. Vercel'e deploy
+
+1. [vercel.com](https://vercel.com)'da GitHub reponuzu import edin.
+2. Environment Variables kısmına `.env.example`'daki değişkenleri **production değerleriyle** girin: `DATABASE_URL` (Neon/Supabase), `SESSION_SECRET` (yeni bir tane üretin), `S3_*` (R2 bilgileri), `NEXT_PUBLIC_SITE_URL` (gerçek domain), `NEXT_PUBLIC_WHATSAPP_NUMBER`. `SEED_ADMIN_*` değişkenlerini Vercel'e eklemenize gerek yok, sadece local'den seed çalıştırırken kullanılıyor.
+3. Deploy edin. Vercel otomatik HTTPS sağlar.
+4. Kendi domaininizi (örn. emirhanotomotiv.com) Vercel proje ayarlarından bağlayın.
+
+> Not: Hesap oluşturma, domain satın alma ve gerçek API anahtarlarını girme adımları kendi hesaplarınızda yapılmalıdır. Bu adımlarda takılırsanız hangi ekranda olduğunuzu söyleyin, birlikte ilerleriz.
+
 ## Kapsam Durumu (Faz 1)
 
 Tamamlanan: araç kataloğu + filtreleme, 8+ fotoğraflı araç detay sayfası (galeri/lightbox, teknik özellikler, donanım, ekspertiz/hasar bilgileri), admin panelinde araç CRUD + görsel/rapor yükleme + stok durumu yönetimi, admin authentication.

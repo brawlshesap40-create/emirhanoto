@@ -425,6 +425,11 @@ async function seedVehicles() {
 
 async function main() {
   await seedAdminUser();
+
+  if (process.env.SEED_SKIP_VEHICLES === "true") {
+    console.log("SEED_SKIP_VEHICLES=true - demo arac eklenmedi.");
+    return;
+  }
   await seedVehicles();
 }
 
