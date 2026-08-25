@@ -1,8 +1,10 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { CheckCircle2, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,6 +73,15 @@ export function ListingIssueDialogTrigger({ vehicleId }: { vehicleId: number }) 
               <div className="space-y-1.5">
                 <Label htmlFor="li-email">E-posta (opsiyonel)</Label>
                 <Input id="li-email" name="email" type="email" />
+              </div>
+              <div className="flex items-start gap-2">
+                <Checkbox id="li-kvkk" name="kvkkConsent" required className="mt-0.5" />
+                <Label htmlFor="li-kvkk" className="text-xs font-normal text-muted-foreground">
+                  <Link href="/kvkk" target="_blank" className="underline hover:text-foreground">
+                    KVKK Aydınlatma Metni
+                  </Link>
+                  &apos;ni okudum, kabul ediyorum. *
+                </Label>
               </div>
               {state.status === "error" && (
                 <p className="text-sm text-destructive">{state.message}</p>

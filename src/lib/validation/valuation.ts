@@ -1,14 +1,20 @@
 import { z } from "zod";
 
 export const valuationRequestSchema = z.object({
-  fullName: z.string().trim().min(2, "Ad soyad zorunludur"),
-  phone: z.string().trim().min(10, "Geçerli bir telefon numarası girin"),
-  email: z.string().trim().email("Geçerli bir e-posta girin").optional().or(z.literal("")),
-  brand: z.string().trim().min(1, "Marka zorunludur"),
-  model: z.string().trim().min(1, "Model zorunludur"),
+  fullName: z.string().trim().min(2, "Ad soyad zorunludur").max(150),
+  phone: z.string().trim().min(10, "Geçerli bir telefon numarası girin").max(30),
+  email: z
+    .string()
+    .trim()
+    .max(255)
+    .email("Geçerli bir e-posta girin")
+    .optional()
+    .or(z.literal("")),
+  brand: z.string().trim().min(1, "Marka zorunludur").max(100),
+  model: z.string().trim().min(1, "Model zorunludur").max(100),
   year: z.number().int().min(1980).max(2100),
   mileage: z.number().int().min(0),
-  description: z.string().trim().optional().or(z.literal("")),
+  description: z.string().trim().max(3000).optional().or(z.literal("")),
 });
 
 export type ValuationRequestInput = z.infer<typeof valuationRequestSchema>;

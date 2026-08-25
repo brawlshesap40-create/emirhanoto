@@ -1,10 +1,11 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { contactMessages } from "@/lib/db/schema";
 
 export async function getAllContactMessages() {
   return db.query.contactMessages.findMany({
     orderBy: [desc(contactMessages.createdAt)],
+    limit: 500,
   });
 }
 
@@ -15,9 +16,9 @@ export async function getContactMessageById(id: number) {
 }
 
 export async function countNewContactMessages() {
-  const rows = await db.query.contactMessages.findMany({
-    where: eq(contactMessages.status, "yeni"),
-    columns: { id: true },
-  });
-  return rows.length;
+  const [row] = await db
+    .select({ total: sql<number>`count(*)` })
+    .from(contactMessages)
+    .where(eq(contactMessages.status, "yeni"));
+  return Number(row?.total ?? 0);
 }

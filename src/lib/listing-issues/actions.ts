@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { listingIssueReports } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth/dal";
+import { checkRateLimit, getClientIp, RateLimitError } from "@/lib/rate-limit";
 import { listingIssueReportSchema } from "@/lib/validation/listing-issue";
 
 export type ListingIssueFormState =
@@ -16,6 +17,16 @@ export async function submitListingIssueReportAction(
   _prevState: ListingIssueFormState,
   formData: FormData
 ): Promise<ListingIssueFormState> {
+  try {
+    await checkRateLimit(`form:listing-issue:${await getClientIp()}`, {
+      limit: 5,
+      windowSeconds: 600,
+    });
+  } catch (error) {
+    if (error instanceof RateLimitError) return { status: "error", message: error.message };
+    throw error;
+  }
+
   const rawVehicleId = Number(formData.get("vehicleId"));
 
   const parsed = listingIssueReportSchema.safeParse({

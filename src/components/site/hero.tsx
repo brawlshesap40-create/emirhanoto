@@ -20,6 +20,7 @@ export function Hero() {
           loop
           playsInline
           preload="auto"
+          poster="/hero-poster.jpg"
           className="h-full w-full bg-black object-cover"
         >
           <source src="/hero-video.mp4" type="video/mp4" />

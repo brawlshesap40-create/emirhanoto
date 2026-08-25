@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   title: "Araçlarımız",
   description:
     "Emirhan Otomotiv güncel araç stoğunu inceleyin; marka, fiyat, model yılı ve kilometreye göre filtreleyin.",
+  alternates: { canonical: "/araclarimiz" },
 };
 
 type RawSearchParams = Record<string, string | string[] | undefined>;

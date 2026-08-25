@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { rentalRequests } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth/dal";
+import { checkRateLimit, getClientIp, RateLimitError } from "@/lib/rate-limit";
 import {
   rentalRequestSchema,
   rentalRequestResponseSchema,
@@ -20,6 +21,16 @@ export async function submitRentalRequestAction(
   _prevState: RentalRequestFormState,
   formData: FormData
 ): Promise<RentalRequestFormState> {
+  try {
+    await checkRateLimit(`form:rental-request:${await getClientIp()}`, {
+      limit: 5,
+      windowSeconds: 600,
+    });
+  } catch (error) {
+    if (error instanceof RateLimitError) return { status: "error", message: error.message };
+    throw error;
+  }
+
   const rawVehicleId = Number(formData.get("rentalVehicleId"));
 
   const parsed = rentalRequestSchema.safeParse({

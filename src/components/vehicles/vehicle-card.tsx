@@ -48,7 +48,7 @@ export function VehicleCard({ vehicle }: { vehicle: VehicleCardData }) {
         {image ? (
           <Image
             src={image.url}
-            alt={image.altText ?? `${vehicle.brand} ${vehicle.model}`}
+            alt={image.altText ?? `${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"

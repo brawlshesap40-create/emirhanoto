@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { testDriveRequests } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth/dal";
+import { checkRateLimit, getClientIp, RateLimitError } from "@/lib/rate-limit";
 import {
   testDriveRequestSchema,
   testDriveResponseSchema,
@@ -20,6 +21,16 @@ export async function submitTestDriveRequestAction(
   _prevState: TestDriveFormState,
   formData: FormData
 ): Promise<TestDriveFormState> {
+  try {
+    await checkRateLimit(`form:test-drive:${await getClientIp()}`, {
+      limit: 5,
+      windowSeconds: 600,
+    });
+  } catch (error) {
+    if (error instanceof RateLimitError) return { status: "error", message: error.message };
+    throw error;
+  }
+
   const rawVehicleId = Number(formData.get("vehicleId"));
 
   const parsed = testDriveRequestSchema.safeParse({

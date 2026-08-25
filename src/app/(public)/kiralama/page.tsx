@@ -23,6 +23,7 @@ export const metadata: Metadata = {
   title: "Kiralama",
   description:
     "Emirhan Otomotiv kiralık araç filosunu inceleyin; marka, kategori ve günlük fiyata göre filtreleyin.",
+  alternates: { canonical: "/kiralama" },
 };
 
 type RawSearchParams = Record<string, string | string[] | undefined>;

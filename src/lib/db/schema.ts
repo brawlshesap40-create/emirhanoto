@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   date,
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -47,6 +48,20 @@ export const rentalVehicleStatusEnum = pgEnum("rental_vehicle_status", [
   "bakimda",
 ]);
 
+export const rateLimitHits = pgTable(
+  "rate_limit_hits",
+  {
+    id: serial("id").primaryKey(),
+    key: varchar("key", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("rate_limit_hits_key_created_at_idx").on(table.key, table.createdAt),
+  ]
+);
+
 export const adminUsers = pgTable("admin_users", {
   id: serial("id").primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),
@@ -56,7 +71,9 @@ export const adminUsers = pgTable("admin_users", {
     .defaultNow(),
 });
 
-export const vehicles = pgTable("vehicles", {
+export const vehicles = pgTable(
+  "vehicles",
+  {
   id: serial("id").primaryKey(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
 
@@ -101,9 +118,18 @@ export const vehicles = pgTable("vehicles", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+  },
+  (table) => [
+    index("vehicles_status_idx").on(table.status),
+    index("vehicles_brand_idx").on(table.brand),
+    index("vehicles_category_idx").on(table.category),
+    index("vehicles_created_at_idx").on(table.createdAt),
+  ]
+);
 
-export const vehicleImages = pgTable("vehicle_images", {
+export const vehicleImages = pgTable(
+  "vehicle_images",
+  {
   id: serial("id").primaryKey(),
   vehicleId: integer("vehicle_id")
     .notNull()
@@ -112,17 +138,25 @@ export const vehicleImages = pgTable("vehicle_images", {
   sortOrder: integer("sort_order").notNull().default(0),
   altText: varchar("alt_text", { length: 255 }),
   category: varchar("category", { length: 20 }),
-});
+  },
+  (table) => [index("vehicle_images_vehicle_id_idx").on(table.vehicleId)]
+);
 
-export const vehicleFeatures = pgTable("vehicle_features", {
+export const vehicleFeatures = pgTable(
+  "vehicle_features",
+  {
   id: serial("id").primaryKey(),
   vehicleId: integer("vehicle_id")
     .notNull()
     .references(() => vehicles.id, { onDelete: "cascade" }),
   label: varchar("label", { length: 100 }).notNull(),
-});
+  },
+  (table) => [index("vehicle_features_vehicle_id_idx").on(table.vehicleId)]
+);
 
-export const valuationRequests = pgTable("valuation_requests", {
+export const valuationRequests = pgTable(
+  "valuation_requests",
+  {
   id: serial("id").primaryKey(),
 
   fullName: varchar("full_name", { length: 150 }).notNull(),
@@ -145,9 +179,13 @@ export const valuationRequests = pgTable("valuation_requests", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+  },
+  (table) => [index("valuation_requests_status_idx").on(table.status)]
+);
 
-export const testDriveRequests = pgTable("test_drive_requests", {
+export const testDriveRequests = pgTable(
+  "test_drive_requests",
+  {
   id: serial("id").primaryKey(),
   vehicleId: integer("vehicle_id")
     .notNull()
@@ -171,9 +209,16 @@ export const testDriveRequests = pgTable("test_drive_requests", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+  },
+  (table) => [
+    index("test_drive_requests_vehicle_id_idx").on(table.vehicleId),
+    index("test_drive_requests_status_idx").on(table.status),
+  ]
+);
 
-export const contactMessages = pgTable("contact_messages", {
+export const contactMessages = pgTable(
+  "contact_messages",
+  {
   id: serial("id").primaryKey(),
 
   fullName: varchar("full_name", { length: 150 }).notNull(),
@@ -190,9 +235,13 @@ export const contactMessages = pgTable("contact_messages", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+  },
+  (table) => [index("contact_messages_status_idx").on(table.status)]
+);
 
-export const priceAlertRequests = pgTable("price_alert_requests", {
+export const priceAlertRequests = pgTable(
+  "price_alert_requests",
+  {
   id: serial("id").primaryKey(),
   vehicleId: integer("vehicle_id")
     .notNull()
@@ -207,9 +256,13 @@ export const priceAlertRequests = pgTable("price_alert_requests", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+  },
+  (table) => [index("price_alert_requests_vehicle_id_idx").on(table.vehicleId)]
+);
 
-export const creditApplications = pgTable("credit_applications", {
+export const creditApplications = pgTable(
+  "credit_applications",
+  {
   id: serial("id").primaryKey(),
   vehicleId: integer("vehicle_id").references(() => vehicles.id, {
     onDelete: "set null",
@@ -229,7 +282,12 @@ export const creditApplications = pgTable("credit_applications", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+  },
+  (table) => [
+    index("credit_applications_vehicle_id_idx").on(table.vehicleId),
+    index("credit_applications_status_idx").on(table.status),
+  ]
+);
 
 export const stockAlertSubscriptions = pgTable("stock_alert_subscriptions", {
   id: serial("id").primaryKey(),
@@ -243,7 +301,9 @@ export const stockAlertSubscriptions = pgTable("stock_alert_subscriptions", {
     .defaultNow(),
 });
 
-export const listingIssueReports = pgTable("listing_issue_reports", {
+export const listingIssueReports = pgTable(
+  "listing_issue_reports",
+  {
   id: serial("id").primaryKey(),
   vehicleId: integer("vehicle_id")
     .notNull()
@@ -257,9 +317,13 @@ export const listingIssueReports = pgTable("listing_issue_reports", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+  },
+  (table) => [index("listing_issue_reports_vehicle_id_idx").on(table.vehicleId)]
+);
 
-export const rentalVehicles = pgTable("rental_vehicles", {
+export const rentalVehicles = pgTable(
+  "rental_vehicles",
+  {
   id: serial("id").primaryKey(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
 
@@ -290,9 +354,18 @@ export const rentalVehicles = pgTable("rental_vehicles", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+  },
+  (table) => [
+    index("rental_vehicles_status_idx").on(table.status),
+    index("rental_vehicles_brand_idx").on(table.brand),
+    index("rental_vehicles_category_idx").on(table.category),
+    index("rental_vehicles_created_at_idx").on(table.createdAt),
+  ]
+);
 
-export const rentalVehicleImages = pgTable("rental_vehicle_images", {
+export const rentalVehicleImages = pgTable(
+  "rental_vehicle_images",
+  {
   id: serial("id").primaryKey(),
   rentalVehicleId: integer("rental_vehicle_id")
     .notNull()
@@ -301,17 +374,29 @@ export const rentalVehicleImages = pgTable("rental_vehicle_images", {
   sortOrder: integer("sort_order").notNull().default(0),
   altText: varchar("alt_text", { length: 255 }),
   category: varchar("category", { length: 20 }),
-});
+  },
+  (table) => [
+    index("rental_vehicle_images_rental_vehicle_id_idx").on(table.rentalVehicleId),
+  ]
+);
 
-export const rentalVehicleFeatures = pgTable("rental_vehicle_features", {
+export const rentalVehicleFeatures = pgTable(
+  "rental_vehicle_features",
+  {
   id: serial("id").primaryKey(),
   rentalVehicleId: integer("rental_vehicle_id")
     .notNull()
     .references(() => rentalVehicles.id, { onDelete: "cascade" }),
   label: varchar("label", { length: 100 }).notNull(),
-});
+  },
+  (table) => [
+    index("rental_vehicle_features_rental_vehicle_id_idx").on(table.rentalVehicleId),
+  ]
+);
 
-export const rentalRequests = pgTable("rental_requests", {
+export const rentalRequests = pgTable(
+  "rental_requests",
+  {
   id: serial("id").primaryKey(),
   rentalVehicleId: integer("rental_vehicle_id")
     .notNull()
@@ -334,7 +419,12 @@ export const rentalRequests = pgTable("rental_requests", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+  },
+  (table) => [
+    index("rental_requests_rental_vehicle_id_idx").on(table.rentalVehicleId),
+    index("rental_requests_status_idx").on(table.status),
+  ]
+);
 
 export const vehiclesRelations = relations(vehicles, ({ many }) => ({
   images: many(vehicleImages),

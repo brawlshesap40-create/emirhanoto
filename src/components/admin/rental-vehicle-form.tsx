@@ -165,6 +165,7 @@ export function RentalVehicleForm({
         }
       } catch (error) {
         if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
+        console.error("[rental-vehicle-form] Kaydetme hatasi:", error);
         toast.error("Kaydedilirken bir hata oluştu.");
       }
     });

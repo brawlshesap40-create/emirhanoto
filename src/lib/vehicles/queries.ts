@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, gte, ilike, inArray, lte, ne, sql } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { vehicles } from "@/lib/db/schema";
 import type { VehicleCategory } from "./constants";
@@ -15,6 +16,13 @@ export type VehicleFilters = {
   bodyType?: string;
   category?: VehicleCategory;
 };
+
+// Bu dosya ham Drizzle sorguları kullandığı için Next'in fetch()-tabanlı
+// önbelleği bunlara uygulanmaz; unstable_cache ile açık bir ISR katmanı
+// kuruyoruz. Yazma işlemleri (vehicles/actions.ts) revalidateTag("vehicles")
+// çağırarak bu önbelleği anında geçersiz kılar — 5 dakikalık revalidate
+// süresi sadece bir üst sınır.
+const CACHE_OPTIONS = { revalidate: 300, tags: ["vehicles"] };
 
 function buildWhere(filters: VehicleFilters) {
   const conditions = [ne(vehicles.status, "satildi")];
@@ -37,55 +45,67 @@ function buildWhere(filters: VehicleFilters) {
   return and(...conditions);
 }
 
-export async function getVehicles(filters: VehicleFilters = {}) {
-  return db.query.vehicles.findMany({
-    where: buildWhere(filters),
-    orderBy: [desc(vehicles.createdAt)],
-    with: {
-      images: { orderBy: (images, { asc }) => [asc(images.sortOrder)], limit: 1 },
-    },
-  });
-}
+export const getVehicles = unstable_cache(
+  async (filters: VehicleFilters = {}) => {
+    return db.query.vehicles.findMany({
+      where: buildWhere(filters),
+      orderBy: [desc(vehicles.createdAt)],
+      with: {
+        images: { orderBy: (images, { asc }) => [asc(images.sortOrder)], limit: 1 },
+      },
+    });
+  },
+  ["vehicles-list"],
+  CACHE_OPTIONS
+);
 
-export async function getFeaturedVehicles(limit = 6) {
-  return db.query.vehicles.findMany({
-    where: and(ne(vehicles.status, "satildi"), eq(vehicles.isFeatured, true)),
-    orderBy: [desc(vehicles.createdAt)],
-    limit,
-    with: {
-      images: { orderBy: (images, { asc }) => [asc(images.sortOrder)], limit: 1 },
-    },
-  });
-}
+export const getFeaturedVehicles = unstable_cache(
+  async (limit = 6) => {
+    return db.query.vehicles.findMany({
+      where: and(ne(vehicles.status, "satildi"), eq(vehicles.isFeatured, true)),
+      orderBy: [desc(vehicles.createdAt)],
+      limit,
+      with: {
+        images: { orderBy: (images, { asc }) => [asc(images.sortOrder)], limit: 1 },
+      },
+    });
+  },
+  ["vehicles-featured"],
+  CACHE_OPTIONS
+);
 
-export async function getVehicleBySlug(slug: string) {
-  return db.query.vehicles.findFirst({
-    where: eq(vehicles.slug, slug),
-    with: {
-      images: { orderBy: (images, { asc }) => [asc(images.sortOrder)] },
-      features: { orderBy: (features, { asc }) => [asc(features.id)] },
-    },
-  });
-}
+export const getVehicleBySlug = unstable_cache(
+  async (slug: string) => {
+    return db.query.vehicles.findFirst({
+      where: eq(vehicles.slug, slug),
+      with: {
+        images: { orderBy: (images, { asc }) => [asc(images.sortOrder)] },
+        features: { orderBy: (features, { asc }) => [asc(features.id)] },
+      },
+    });
+  },
+  ["vehicle-by-slug"],
+  CACHE_OPTIONS
+);
 
-export async function getSimilarVehicles(vehicle: {
-  id: number;
-  category: VehicleCategory;
-  brand: string;
-}) {
-  return db.query.vehicles.findMany({
-    where: and(
-      ne(vehicles.status, "satildi"),
-      ne(vehicles.id, vehicle.id),
-      sql`(${vehicles.category} = ${vehicle.category} or ${vehicles.brand} = ${vehicle.brand})`
-    ),
-    orderBy: [desc(vehicles.createdAt)],
-    limit: 4,
-    with: {
-      images: { orderBy: (images, { asc }) => [asc(images.sortOrder)], limit: 1 },
-    },
-  });
-}
+export const getSimilarVehicles = unstable_cache(
+  async (vehicle: { id: number; category: VehicleCategory; brand: string }) => {
+    return db.query.vehicles.findMany({
+      where: and(
+        ne(vehicles.status, "satildi"),
+        ne(vehicles.id, vehicle.id),
+        sql`(${vehicles.category} = ${vehicle.category} or ${vehicles.brand} = ${vehicle.brand})`
+      ),
+      orderBy: [desc(vehicles.createdAt)],
+      limit: 4,
+      with: {
+        images: { orderBy: (images, { asc }) => [asc(images.sortOrder)], limit: 1 },
+      },
+    });
+  },
+  ["vehicles-similar"],
+  CACHE_OPTIONS
+);
 
 export async function getVehiclesByIds(ids: number[]) {
   if (ids.length === 0) return [];
@@ -104,22 +124,30 @@ export async function incrementVehicleView(id: number) {
     .where(eq(vehicles.id, id));
 }
 
-export async function getDistinctBrands() {
-  const rows = await db
-    .selectDistinct({ brand: vehicles.brand })
-    .from(vehicles)
-    .where(ne(vehicles.status, "satildi"))
-    .orderBy(asc(vehicles.brand));
-  return rows.map((row) => row.brand);
-}
+export const getDistinctBrands = unstable_cache(
+  async () => {
+    const rows = await db
+      .selectDistinct({ brand: vehicles.brand })
+      .from(vehicles)
+      .where(ne(vehicles.status, "satildi"))
+      .orderBy(asc(vehicles.brand));
+    return rows.map((row) => row.brand);
+  },
+  ["vehicles-distinct-brands"],
+  CACHE_OPTIONS
+);
 
-export async function getPriceRange() {
-  const [row] = await db
-    .select({
-      min: sql<number>`min(${vehicles.price})`,
-      max: sql<number>`max(${vehicles.price})`,
-    })
-    .from(vehicles)
-    .where(ne(vehicles.status, "satildi"));
-  return { min: row?.min ?? 0, max: row?.max ?? 0 };
-}
+export const getPriceRange = unstable_cache(
+  async () => {
+    const [row] = await db
+      .select({
+        min: sql<number>`min(${vehicles.price})`,
+        max: sql<number>`max(${vehicles.price})`,
+      })
+      .from(vehicles)
+      .where(ne(vehicles.status, "satildi"));
+    return { min: row?.min ?? 0, max: row?.max ?? 0 };
+  },
+  ["vehicles-price-range"],
+  CACHE_OPTIONS
+);

@@ -1,0 +1,22 @@
+CREATE INDEX "contact_messages_status_idx" ON "contact_messages" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "credit_applications_vehicle_id_idx" ON "credit_applications" USING btree ("vehicle_id");--> statement-breakpoint
+CREATE INDEX "credit_applications_status_idx" ON "credit_applications" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "listing_issue_reports_vehicle_id_idx" ON "listing_issue_reports" USING btree ("vehicle_id");--> statement-breakpoint
+CREATE INDEX "price_alert_requests_vehicle_id_idx" ON "price_alert_requests" USING btree ("vehicle_id");--> statement-breakpoint
+CREATE INDEX "rental_requests_rental_vehicle_id_idx" ON "rental_requests" USING btree ("rental_vehicle_id");--> statement-breakpoint
+CREATE INDEX "rental_requests_status_idx" ON "rental_requests" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "rental_vehicle_features_rental_vehicle_id_idx" ON "rental_vehicle_features" USING btree ("rental_vehicle_id");--> statement-breakpoint
+CREATE INDEX "rental_vehicle_images_rental_vehicle_id_idx" ON "rental_vehicle_images" USING btree ("rental_vehicle_id");--> statement-breakpoint
+CREATE INDEX "rental_vehicles_status_idx" ON "rental_vehicles" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "rental_vehicles_brand_idx" ON "rental_vehicles" USING btree ("brand");--> statement-breakpoint
+CREATE INDEX "rental_vehicles_category_idx" ON "rental_vehicles" USING btree ("category");--> statement-breakpoint
+CREATE INDEX "rental_vehicles_created_at_idx" ON "rental_vehicles" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "test_drive_requests_vehicle_id_idx" ON "test_drive_requests" USING btree ("vehicle_id");--> statement-breakpoint
+CREATE INDEX "test_drive_requests_status_idx" ON "test_drive_requests" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "valuation_requests_status_idx" ON "valuation_requests" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "vehicle_features_vehicle_id_idx" ON "vehicle_features" USING btree ("vehicle_id");--> statement-breakpoint
+CREATE INDEX "vehicle_images_vehicle_id_idx" ON "vehicle_images" USING btree ("vehicle_id");--> statement-breakpoint
+CREATE INDEX "vehicles_status_idx" ON "vehicles" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "vehicles_brand_idx" ON "vehicles" USING btree ("brand");--> statement-breakpoint
+CREATE INDEX "vehicles_category_idx" ON "vehicles" USING btree ("category");--> statement-breakpoint
+CREATE INDEX "vehicles_created_at_idx" ON "vehicles" USING btree ("created_at");

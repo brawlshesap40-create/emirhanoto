@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { contactMessages } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth/dal";
+import { checkRateLimit, getClientIp, RateLimitError } from "@/lib/rate-limit";
 import {
   contactMessageSchema,
   contactMessageResponseSchema,
@@ -20,6 +21,16 @@ export async function submitContactMessageAction(
   _prevState: ContactMessageFormState,
   formData: FormData
 ): Promise<ContactMessageFormState> {
+  try {
+    await checkRateLimit(`form:contact:${await getClientIp()}`, {
+      limit: 5,
+      windowSeconds: 600,
+    });
+  } catch (error) {
+    if (error instanceof RateLimitError) return { status: "error", message: error.message };
+    throw error;
+  }
+
   const parsed = contactMessageSchema.safeParse({
     fullName: String(formData.get("fullName") ?? ""),
     phone: String(formData.get("phone") ?? ""),

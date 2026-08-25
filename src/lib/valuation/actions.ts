@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { valuationRequests } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth/dal";
+import { checkRateLimit, getClientIp, RateLimitError } from "@/lib/rate-limit";
 import {
   valuationRequestSchema,
   valuationResponseSchema,
@@ -20,6 +21,16 @@ export async function submitValuationRequestAction(
   _prevState: ValuationFormState,
   formData: FormData
 ): Promise<ValuationFormState> {
+  try {
+    await checkRateLimit(`form:valuation:${await getClientIp()}`, {
+      limit: 5,
+      windowSeconds: 600,
+    });
+  } catch (error) {
+    if (error instanceof RateLimitError) return { status: "error", message: error.message };
+    throw error;
+  }
+
   const rawYear = Number(formData.get("year"));
   const rawMileage = Number(formData.get("mileage"));
 

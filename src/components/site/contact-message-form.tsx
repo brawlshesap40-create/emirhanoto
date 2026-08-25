@@ -1,8 +1,10 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +55,15 @@ export function ContactMessageForm() {
       <div className="space-y-1.5">
         <Label htmlFor="cm-message">Mesajınız *</Label>
         <Textarea id="cm-message" name="message" rows={4} required />
+      </div>
+      <div className="flex items-start gap-2">
+        <Checkbox id="cm-kvkk" name="kvkkConsent" required className="mt-0.5" />
+        <Label htmlFor="cm-kvkk" className="text-xs font-normal text-muted-foreground">
+          <Link href="/kvkk" target="_blank" className="underline hover:text-foreground">
+            KVKK Aydınlatma Metni
+          </Link>
+          &apos;ni okudum, kişisel verilerimin işlenmesini kabul ediyorum. *
+        </Label>
       </div>
       {state.status === "error" && (
         <p className="text-sm text-destructive">{state.message}</p>

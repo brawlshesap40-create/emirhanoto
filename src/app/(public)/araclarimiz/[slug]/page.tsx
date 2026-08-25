@@ -30,7 +30,7 @@ import {
 } from "@/lib/vehicles/queries";
 import { formatMileage, formatPrice } from "@/lib/format";
 import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/vehicles/constants";
-import { buildWhatsAppUrl, siteConfig } from "@/lib/site-config";
+import { buildOrganizationJsonLd, buildWhatsAppUrl, siteConfig } from "@/lib/site-config";
 
 type Params = { slug: string };
 
@@ -77,13 +77,20 @@ export default async function VehicleDetailPage({
   const vehicleUrl = `${siteConfig.siteUrl}/araclarimiz/${vehicle.slug}`;
   const priceDropped = vehicle.previousPrice != null && vehicle.previousPrice > vehicle.price;
 
+  // Server Component rendered fresh per request; per-request freshness is intended here.
+  // eslint-disable-next-line react-hooks/purity
+  const priceValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Vehicle",
+    "@type": "Car",
     name: `${vehicle.brand} ${vehicle.model} ${vehicle.year}`,
     brand: vehicle.brand,
     model: vehicle.model,
     vehicleModelDate: String(vehicle.year),
+    itemCondition: "https://schema.org/UsedCondition",
     mileageFromOdometer: {
       "@type": "QuantitativeValue",
       value: vehicle.mileage,
@@ -96,11 +103,14 @@ export default async function VehicleDetailPage({
       "@type": "Offer",
       price: vehicle.price,
       priceCurrency: "TRY",
+      priceValidUntil,
+      itemCondition: "https://schema.org/UsedCondition",
       availability:
         vehicle.status === "satista"
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
       url: vehicleUrl,
+      seller: buildOrganizationJsonLd(),
     },
   };
 

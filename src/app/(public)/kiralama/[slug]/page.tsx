@@ -23,7 +23,7 @@ import {
 } from "@/lib/rentals/queries";
 import { formatPrice } from "@/lib/format";
 import { RENTAL_CATEGORY_LABELS, RENTAL_STATUS_LABELS } from "@/lib/rentals/constants";
-import { buildWhatsAppUrl, siteConfig } from "@/lib/site-config";
+import { buildOrganizationJsonLd, buildWhatsAppUrl, siteConfig } from "@/lib/site-config";
 
 type Params = { slug: string };
 
@@ -43,6 +43,7 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: { canonical: `/kiralama/${vehicle.slug}` },
     openGraph: {
       title,
       description,
@@ -63,9 +64,44 @@ export default async function RentalVehicleDetailPage({
 
   const similarVehicles = await getSimilarRentalVehicles(vehicle);
   const whatsappMessage = `Merhaba, sitedeki ${vehicle.brand} ${vehicle.model} kiralama ilanı hakkında bilgi almak istiyorum.`;
+  const vehicleUrl = `${siteConfig.siteUrl}/kiralama/${vehicle.slug}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Car",
+    name: `${vehicle.brand} ${vehicle.model} ${vehicle.year}`,
+    brand: vehicle.brand,
+    model: vehicle.model,
+    vehicleModelDate: String(vehicle.year),
+    fuelType: vehicle.fuelType ?? undefined,
+    vehicleTransmission: vehicle.transmission ?? undefined,
+    image: vehicle.images.map((image) => image.url),
+    offers: {
+      "@type": "Offer",
+      businessFunction: "http://purl.org/goodrelations/v1#LeaseOut",
+      price: vehicle.dailyPrice,
+      priceCurrency: "TRY",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: vehicle.dailyPrice,
+        priceCurrency: "TRY",
+        unitText: "GÜN",
+      },
+      availability:
+        vehicle.status === "musait"
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      url: vehicleUrl,
+      seller: buildOrganizationJsonLd(),
+    },
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>

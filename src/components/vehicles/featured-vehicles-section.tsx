@@ -38,7 +38,7 @@ export async function FeaturedVehiclesSection() {
           {spotlightImage ? (
             <Image
               src={spotlightImage.url}
-              alt={spotlightImage.altText ?? `${spotlight.brand} ${spotlight.model}`}
+              alt={spotlightImage.altText ?? `${spotlight.brand} ${spotlight.model} ${spotlight.year}`}
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"
               priority

@@ -44,6 +44,12 @@ export function Footer() {
             >
               İletişim
             </Link>
+            <Link
+              href="/kvkk"
+              className="w-fit transition-colors hover:text-white"
+            >
+              KVKK Aydınlatma Metni
+            </Link>
           </nav>
         </div>
 

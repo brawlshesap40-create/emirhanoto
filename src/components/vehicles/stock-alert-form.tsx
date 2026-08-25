@@ -1,8 +1,10 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { BellPlus, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -42,41 +44,52 @@ export function StockAlertForm() {
           </p>
         </div>
       </div>
-      <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="space-y-1">
-          <Label htmlFor="sa-email" className="text-xs">
-            E-posta *
-          </Label>
-          <Input id="sa-email" name="email" type="email" required placeholder="ornek@mail.com" />
+      <div className="flex flex-1 flex-col gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="space-y-1">
+            <Label htmlFor="sa-email" className="text-xs">
+              E-posta *
+            </Label>
+            <Input id="sa-email" name="email" type="email" required placeholder="ornek@mail.com" />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="sa-brand" className="text-xs">
+              Marka
+            </Label>
+            <Input id="sa-brand" name="brand" placeholder="Örn. Toyota" />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="sa-category" className="text-xs">
+              Kategori
+            </Label>
+            <select
+              id="sa-category"
+              name="category"
+              defaultValue=""
+              className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <option value="">Fark etmez</option>
+              {CATEGORY_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="space-y-1">
-          <Label htmlFor="sa-brand" className="text-xs">
-            Marka
+        <div className="flex items-start gap-2">
+          <Checkbox id="sa-kvkk" name="kvkkConsent" required className="mt-0.5" />
+          <Label htmlFor="sa-kvkk" className="text-xs font-normal text-muted-foreground">
+            <Link href="/kvkk" target="_blank" className="underline hover:text-foreground">
+              KVKK Aydınlatma Metni
+            </Link>
+            &apos;ni okudum, kabul ediyorum. *
           </Label>
-          <Input id="sa-brand" name="brand" placeholder="Örn. Toyota" />
         </div>
-        <div className="space-y-1">
-          <Label htmlFor="sa-category" className="text-xs">
-            Kategori
-          </Label>
-          <select
-            id="sa-category"
-            name="category"
-            defaultValue=""
-            className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
-            <option value="">Fark etmez</option>
-            {CATEGORY_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        {state.status === "error" && (
+          <p className="text-sm text-destructive">{state.message}</p>
+        )}
       </div>
-      {state.status === "error" && (
-        <p className="text-sm text-destructive">{state.message}</p>
-      )}
       <Button type="submit" disabled={pending} className="sm:self-end">
         {pending ? "Kaydediliyor..." : "Haberdar Et"}
       </Button>

@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { testDriveRequests } from "@/lib/db/schema";
 
@@ -6,6 +6,7 @@ export async function getAllTestDriveRequests() {
   return db.query.testDriveRequests.findMany({
     orderBy: [desc(testDriveRequests.createdAt)],
     with: { vehicle: true },
+    limit: 500,
   });
 }
 
@@ -17,9 +18,9 @@ export async function getTestDriveRequestById(id: number) {
 }
 
 export async function countNewTestDriveRequests() {
-  const rows = await db.query.testDriveRequests.findMany({
-    where: eq(testDriveRequests.status, "yeni"),
-    columns: { id: true },
-  });
-  return rows.length;
+  const [row] = await db
+    .select({ total: sql<number>`count(*)` })
+    .from(testDriveRequests)
+    .where(eq(testDriveRequests.status, "yeni"));
+  return Number(row?.total ?? 0);
 }

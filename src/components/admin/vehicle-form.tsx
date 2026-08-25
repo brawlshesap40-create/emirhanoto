@@ -218,6 +218,7 @@ export function VehicleForm({
         }
       } catch (error) {
         if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
+        console.error("[vehicle-form] Kaydetme hatasi:", error);
         toast.error("Kaydedilirken bir hata oluştu.");
       }
     });

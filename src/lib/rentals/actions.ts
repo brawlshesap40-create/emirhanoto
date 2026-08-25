@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { db } from "@/lib/db";
 import { rentalVehicleFeatures, rentalVehicleImages, rentalVehicles } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth/dal";
@@ -14,6 +14,7 @@ import { generateRentalVehicleSlug } from "./slug";
 import { getRentalVehiclesByIds } from "./queries";
 
 function revalidatePublicPaths(slug?: string) {
+  updateTag("rentals");
   revalidatePath("/");
   revalidatePath("/kiralama");
   if (slug) revalidatePath(`/kiralama/${slug}`);

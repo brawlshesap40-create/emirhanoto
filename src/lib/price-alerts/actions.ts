@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { priceAlertRequests } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth/dal";
+import { checkRateLimit, getClientIp, RateLimitError } from "@/lib/rate-limit";
 import { priceAlertRequestSchema } from "@/lib/validation/price-alert";
 
 export type PriceAlertFormState =
@@ -16,6 +17,16 @@ export async function submitPriceAlertRequestAction(
   _prevState: PriceAlertFormState,
   formData: FormData
 ): Promise<PriceAlertFormState> {
+  try {
+    await checkRateLimit(`form:price-alert:${await getClientIp()}`, {
+      limit: 5,
+      windowSeconds: 600,
+    });
+  } catch (error) {
+    if (error instanceof RateLimitError) return { status: "error", message: error.message };
+    throw error;
+  }
+
   const rawVehicleId = Number(formData.get("vehicleId"));
 
   const parsed = priceAlertRequestSchema.safeParse({

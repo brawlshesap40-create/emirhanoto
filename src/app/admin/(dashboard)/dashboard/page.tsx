@@ -13,15 +13,15 @@ import {
   PlusCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getAllVehiclesAdmin } from "@/lib/vehicles/admin-queries";
+import { getRecentVehiclesAdmin, getVehicleStats } from "@/lib/vehicles/admin-queries";
 import { countNewValuationRequests } from "@/lib/valuation/queries";
 import { countNewTestDriveRequests } from "@/lib/test-drive/queries";
 import { countNewContactMessages } from "@/lib/messages/queries";
 import { countPendingPriceAlerts } from "@/lib/price-alerts/queries";
 import { countNewCreditApplications } from "@/lib/credit-applications/queries";
 import { countUnresolvedListingIssues } from "@/lib/listing-issues/queries";
-import { getAllStockAlertSubscriptions } from "@/lib/stock-alerts/queries";
-import { getAllRentalVehiclesAdmin } from "@/lib/rentals/admin-queries";
+import { countStockAlertSubscriptions } from "@/lib/stock-alerts/queries";
+import { getRentalVehicleCount } from "@/lib/rentals/admin-queries";
 import { countNewRentalRequests } from "@/lib/rentals/requests-queries";
 import { formatPrice } from "@/lib/format";
 import { STATUS_LABELS } from "@/lib/vehicles/constants";
@@ -33,31 +33,30 @@ export const metadata: Metadata = {
 
 export default async function AdminDashboardPage() {
   const [
-    vehicles,
+    vehicleStats,
+    recentVehicles,
     newValuationCount,
     newTestDriveCount,
     newMessageCount,
     pendingPriceAlertCount,
     newCreditApplicationCount,
     unresolvedIssueCount,
-    stockAlerts,
-    rentalVehicles,
+    stockAlertCount,
+    rentalVehicleCount,
     newRentalRequestCount,
   ] = await Promise.all([
-    getAllVehiclesAdmin(),
+    getVehicleStats(),
+    getRecentVehiclesAdmin(5),
     countNewValuationRequests(),
     countNewTestDriveRequests(),
     countNewContactMessages(),
     countPendingPriceAlerts(),
     countNewCreditApplications(),
     countUnresolvedListingIssues(),
-    getAllStockAlertSubscriptions(),
-    getAllRentalVehiclesAdmin(),
+    countStockAlertSubscriptions(),
+    getRentalVehicleCount(),
     countNewRentalRequests(),
   ]);
-
-  const activeVehicles = vehicles.filter((v) => v.status === "satista").length;
-  const recentVehicles = vehicles.slice(0, 5);
 
   const cards = [
     {
@@ -106,7 +105,7 @@ export default async function AdminDashboardPage() {
       href: "/admin/stock-alerts",
       icon: Bell,
       label: "Stok Bildirimleri",
-      count: stockAlerts.length,
+      count: stockAlertCount,
     },
   ];
 
@@ -146,8 +145,8 @@ export default async function AdminDashboardPage() {
             </span>
           </div>
           <div className="mt-6">
-            <p className="text-3xl font-bold tabular-nums">{vehicles.length}</p>
-            <p className="mt-1 text-xs opacity-80">{activeVehicles} araç satışta</p>
+            <p className="text-3xl font-bold tabular-nums">{vehicleStats.total}</p>
+            <p className="mt-1 text-xs opacity-80">{vehicleStats.active} araç satışta</p>
           </div>
         </Link>
 
@@ -164,7 +163,7 @@ export default async function AdminDashboardPage() {
             </span>
           </div>
           <div className="mt-6">
-            <p className="text-3xl font-bold tabular-nums">{rentalVehicles.length}</p>
+            <p className="text-3xl font-bold tabular-nums">{rentalVehicleCount}</p>
             <p className="mt-1 text-xs text-muted-foreground">Kiralık Araç Filosu</p>
           </div>
         </Link>

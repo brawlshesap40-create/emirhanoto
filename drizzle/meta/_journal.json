@@ -50,6 +50,20 @@
       "when": 1787649256554,
       "tag": "0006_woozy_naoko",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787658320704,
+      "tag": "0007_tidy_siren",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787658861752,
+      "tag": "0008_warm_leper_queen",
+      "breakpoints": true
     }
   ]
 }

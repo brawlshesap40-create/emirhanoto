@@ -1,10 +1,13 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { rentalVehicles } from "@/lib/db/schema";
+
+const ADMIN_LIST_LIMIT = 500;
 
 export async function getAllRentalVehiclesAdmin() {
   return db.query.rentalVehicles.findMany({
     orderBy: [desc(rentalVehicles.createdAt)],
+    limit: ADMIN_LIST_LIMIT,
     with: {
       images: {
         orderBy: (images, { asc }) => [asc(images.sortOrder)],
@@ -12,6 +15,13 @@ export async function getAllRentalVehiclesAdmin() {
       },
     },
   });
+}
+
+export async function getRentalVehicleCount() {
+  const [row] = await db
+    .select({ total: sql<number>`count(*)` })
+    .from(rentalVehicles);
+  return Number(row?.total ?? 0);
 }
 
 export async function getRentalVehicleForEdit(id: number) {

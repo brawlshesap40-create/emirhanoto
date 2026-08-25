@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { listingIssueReports } from "@/lib/db/schema";
 
@@ -6,13 +6,14 @@ export async function getAllListingIssueReports() {
   return db.query.listingIssueReports.findMany({
     orderBy: [desc(listingIssueReports.createdAt)],
     with: { vehicle: true },
+    limit: 500,
   });
 }
 
 export async function countUnresolvedListingIssues() {
-  const rows = await db.query.listingIssueReports.findMany({
-    where: eq(listingIssueReports.resolved, false),
-    columns: { id: true },
-  });
-  return rows.length;
+  const [row] = await db
+    .select({ total: sql<number>`count(*)` })
+    .from(listingIssueReports)
+    .where(eq(listingIssueReports.resolved, false));
+  return Number(row?.total ?? 0);
 }

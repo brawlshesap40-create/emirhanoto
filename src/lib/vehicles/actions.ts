@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { db } from "@/lib/db";
 import { vehicleFeatures, vehicleImages, vehicles } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth/dal";
@@ -11,6 +11,12 @@ import { generateVehicleSlug } from "./slug";
 import { getVehiclesByIds } from "./queries";
 
 function revalidatePublicPaths(slug?: string) {
+  // revalidatePath temizler sayfa render önbelleğini; updateTag ise
+  // queries.ts'teki unstable_cache ile sarılmış veri katmanını temizler.
+  // updateTag (Server Action içinden) bir sonraki isteğin bayat veri
+  // görmemesini garantiler — ör. "satıldı" işaretlenen bir araç anında
+  // öyle görünür.
+  updateTag("vehicles");
   revalidatePath("/");
   revalidatePath("/araclarimiz");
   if (slug) revalidatePath(`/araclarimiz/${slug}`);
