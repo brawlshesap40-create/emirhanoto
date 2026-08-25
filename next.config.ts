@@ -61,6 +61,7 @@ const cspHeader = `
   .trim();
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   images: {
     remotePatterns: [
       ...(remotePattern && remotePattern.hostname !== "localhost"
