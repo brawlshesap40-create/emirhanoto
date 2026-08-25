@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, ilike, lte, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ilike, inArray, lte, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { vehicles } from "@/lib/db/schema";
 import type { VehicleCategory } from "./constants";
@@ -66,6 +66,42 @@ export async function getVehicleBySlug(slug: string) {
       features: { orderBy: (features, { asc }) => [asc(features.id)] },
     },
   });
+}
+
+export async function getSimilarVehicles(vehicle: {
+  id: number;
+  category: VehicleCategory;
+  brand: string;
+}) {
+  return db.query.vehicles.findMany({
+    where: and(
+      ne(vehicles.status, "satildi"),
+      ne(vehicles.id, vehicle.id),
+      sql`(${vehicles.category} = ${vehicle.category} or ${vehicles.brand} = ${vehicle.brand})`
+    ),
+    orderBy: [desc(vehicles.createdAt)],
+    limit: 4,
+    with: {
+      images: { orderBy: (images, { asc }) => [asc(images.sortOrder)], limit: 1 },
+    },
+  });
+}
+
+export async function getVehiclesByIds(ids: number[]) {
+  if (ids.length === 0) return [];
+  return db.query.vehicles.findMany({
+    where: inArray(vehicles.id, ids),
+    with: {
+      images: { orderBy: (images, { asc }) => [asc(images.sortOrder)], limit: 1 },
+    },
+  });
+}
+
+export async function incrementVehicleView(id: number) {
+  await db
+    .update(vehicles)
+    .set({ viewCount: sql`${vehicles.viewCount} + 1` })
+    .where(eq(vehicles.id, id));
 }
 
 export async function getDistinctBrands() {

@@ -1,6 +1,18 @@
+import Link from "next/link";
 import type { Metadata } from "next";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Home, Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { OpenStatus } from "@/components/site/open-status";
+import { PageHeader } from "@/components/site/page-header";
+import { ContactMessageForm } from "@/components/site/contact-message-form";
 import { siteConfig, buildWhatsAppUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -13,12 +25,27 @@ export default function ContactPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-      <div className="max-w-2xl">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">İletişim</h1>
-        <p className="mt-3 text-muted-foreground">
-          Sorularınız için bize ulaşın, size en kısa sürede geri dönelim.
-        </p>
-      </div>
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href="/" />}>
+              <Home className="h-3.5 w-3.5" />
+              Ana Sayfa
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>İletişim</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <PageHeader
+        eyebrow="İletişim"
+        title="Bize Ulaşın"
+        description="Sorularınız için bize ulaşın, size en kısa sürede geri dönelim."
+        action={<OpenStatus />}
+      />
 
       <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <div className="space-y-6">
@@ -95,6 +122,8 @@ export default function ContactPage() {
               Google Maps&apos;te Görüntüle
             </Button>
           </div>
+
+          <ContactMessageForm />
         </div>
 
         <div className="overflow-hidden rounded-xl border border-border">

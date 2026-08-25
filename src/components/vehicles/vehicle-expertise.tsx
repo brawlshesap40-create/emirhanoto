@@ -1,4 +1,4 @@
-import { AlertTriangle, FileText, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ExternalLink, FileText, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DAMAGE_STATUS_LABELS } from "@/lib/vehicles/constants";
@@ -27,13 +27,19 @@ export function VehicleExpertise({ vehicle }: { vehicle: ExpertiseSource }) {
 
   return (
     <div className="space-y-6">
-      <dl className="space-y-3">
+      <p className="text-xs font-medium uppercase tracking-[0.22em] text-brand">
+        {rows.length} Nokta Kontrol Listesi
+      </p>
+      <dl className="space-y-1">
         {rows.map((row) => (
           <div
             key={row.label}
-            className="flex flex-col justify-between gap-1 border-b border-border/60 py-2 text-sm sm:flex-row sm:items-center"
+            className="flex flex-col justify-between gap-1 rounded-md border-b border-border/60 px-2 py-2.5 text-sm transition-colors hover:bg-card sm:flex-row sm:items-center"
           >
-            <dt className="text-muted-foreground">{row.label}</dt>
+            <dt className="flex items-center gap-2 text-muted-foreground">
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-brand" />
+              {row.label}
+            </dt>
             <dd className="font-medium sm:text-right">{row.value}</dd>
           </div>
         ))}
@@ -66,18 +72,30 @@ export function VehicleExpertise({ vehicle }: { vehicle: ExpertiseSource }) {
         </div>
       </div>
 
-      {vehicle.expertiseReportUrl && (
+      <div className="flex flex-wrap gap-3">
+        {vehicle.expertiseReportUrl && (
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={
+              <a href={vehicle.expertiseReportUrl} target="_blank" rel="noopener noreferrer" />
+            }
+          >
+            <FileText className="h-4 w-4" />
+            Ekspertiz Raporunu Görüntüle
+          </Button>
+        )}
         <Button
-          variant="outline"
+          variant="ghost"
           nativeButton={false}
           render={
-            <a href={vehicle.expertiseReportUrl} target="_blank" rel="noopener noreferrer" />
+            <a href="https://www.tramer.org.tr" target="_blank" rel="noopener noreferrer" />
           }
         >
-          <FileText className="h-4 w-4" />
-          Ekspertiz Raporunu Görüntüle
+          <ExternalLink className="h-4 w-4" />
+          TRAMER&apos;den Bağımsız Hasar Sorgula
         </Button>
-      )}
+      </div>
     </div>
   );
 }

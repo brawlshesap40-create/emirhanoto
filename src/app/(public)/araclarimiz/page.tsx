@@ -1,6 +1,18 @@
+import Link from "next/link";
 import type { Metadata } from "next";
+import { Home } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { VehicleCard } from "@/components/vehicles/vehicle-card";
+import { PageHeader } from "@/components/site/page-header";
 import { VehicleFilterForm } from "@/components/vehicles/vehicle-filter-form";
+import { StockAlertForm } from "@/components/vehicles/stock-alert-form";
 import {
   getDistinctBrands,
   getVehicles,
@@ -56,14 +68,33 @@ export default async function VehiclesPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Araçlarımız
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          {vehicles.length} araç listeleniyor
-        </p>
-      </div>
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href="/" />}>
+              <Home className="h-3.5 w-3.5" />
+              Ana Sayfa
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Araçlarımız</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <PageHeader
+        eyebrow="Güncel Stok"
+        title="Araçlarımız"
+        action={
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-muted-foreground shadow-sm">
+            <span className="text-lg font-semibold tabular-nums text-foreground">
+              {vehicles.length}
+            </span>
+            araç listeleniyor
+          </span>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr] lg:gap-8">
         <VehicleFilterForm brands={brands} searchParams={resolvedSearchParams} />
@@ -80,6 +111,10 @@ export default async function VehiclesPage({
               ))}
             </div>
           )}
+
+          <div className="mt-8">
+            <StockAlertForm />
+          </div>
         </div>
       </div>
     </div>

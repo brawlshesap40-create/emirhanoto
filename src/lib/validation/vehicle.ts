@@ -34,12 +34,15 @@ export const vehicleInputSchema = z.object({
   damageStatus: z.enum(["yok", "var"]),
   damageInfo: z.string().trim().nullable(),
   expertiseReportUrl: z.string().trim().nullable(),
+  previousPrice: z.number().int().min(0).nullable(),
+  videoUrl: z.string().trim().nullable(),
   features: z.array(z.string().trim().min(1)),
   images: z
     .array(
       z.object({
         url: z.string().min(1),
         altText: z.string().nullable(),
+        category: z.string().nullable().optional(),
       })
     )
     .min(1, "En az 1 fotoğraf gereklidir"),

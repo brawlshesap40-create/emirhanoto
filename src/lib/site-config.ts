@@ -1,6 +1,7 @@
 export const siteConfig = {
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   name: "Emirhan Otomotiv",
-  slogan: "Çift Kabinde Öncü",
+  slogan: "Güvenle Al, Sat, Kirala",
   description:
     "36 yıllık tecrübemizle İstanbul Bağcılar'da güvenilir araç alım satımında yanınızdayız.",
   phoneDisplay: "0555 993 71 17",

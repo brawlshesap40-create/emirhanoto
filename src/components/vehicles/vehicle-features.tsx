@@ -14,7 +14,7 @@ export function VehicleFeatures({ features }: { features: { id: number; label: s
       {features.map((feature) => (
         <div
           key={feature.id}
-          className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3 py-2.5 text-sm"
+          className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3 py-2.5 text-sm transition-colors duration-200 hover:border-brand/30 hover:bg-card/80"
         >
           <CheckCircle2 className="h-4 w-4 shrink-0 text-brand" />
           {feature.label}

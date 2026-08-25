@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState } from "react";
-import { Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,9 +12,7 @@ export function LoginForm() {
   return (
     <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
       <div className="mb-6 flex flex-col items-center text-center">
-        <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-foreground text-background">
-          <Truck className="h-6 w-6" />
-        </span>
+        <img src="/logo.png" alt="Emirhan Otomotiv" className="h-16 w-auto" />
         <h1 className="mt-3 text-lg font-bold">Emirhan Otomotiv</h1>
         <p className="text-sm text-muted-foreground">Yönetici Paneli Girişi</p>
       </div>

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Truck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ValuationDialogTrigger } from "@/components/site/valuation-dialog";
-import { siteConfig, buildWhatsAppUrl } from "@/lib/site-config";
+import { siteConfig } from "@/lib/site-config";
 
 const STATS = [
   { value: "36 Yıl", label: "Sektör Tecrübesi" },
@@ -12,77 +12,61 @@ const STATS = [
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-foreground text-background">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.06]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
-      <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand/20 blur-3xl" />
-      <Truck className="pointer-events-none absolute -bottom-10 -right-10 h-72 w-72 text-background/5" />
+    <section className="relative -mt-16 overflow-hidden">
+      <div className="absolute inset-0">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className="h-full w-full bg-black object-cover"
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/10 to-transparent" />
+      </div>
 
-      <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-background/15 bg-background/5 px-3 py-1 text-xs font-medium text-background/80">
-          <ShieldCheck className="h-3.5 w-3.5 text-brand" />
-          İstanbul / Bağcılar &middot; 1988&apos;den beri
+      <div className="relative mx-auto flex min-h-screen max-w-7xl items-center px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+        <div className="w-full max-w-xl">
+          <h1 className="text-4xl font-normal tracking-tight text-white sm:text-5xl lg:text-6xl">
+            {siteConfig.slogan}
+          </h1>
+          <p className="mt-5 text-base text-white/75 sm:text-lg">
+            {siteConfig.description}
+          </p>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button
+              size="lg"
+              className="bg-brand text-brand-foreground shadow-[0_0_0_1px_color-mix(in_oklch,var(--brand),transparent_50%),0_8px_24px_-8px_var(--brand)] hover:bg-brand/90"
+              nativeButton={false}
+              render={<Link href="/araclarimiz" />}
+            >
+              Araçlarımızı İncele
+              <ArrowRight className="h-4 w-4 transition-transform group-hover/button:translate-x-0.5" />
+            </Button>
+            <ValuationDialogTrigger
+              size="lg"
+              variant="outline"
+              className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+            >
+              Aracımı Değerle
+            </ValuationDialogTrigger>
+          </div>
+
+          <dl className="mt-10 grid grid-cols-3 divide-x divide-white/20 border-t border-white/20 pt-6">
+            {STATS.map((stat) => (
+              <div key={stat.label} className="px-4 first:pl-0">
+                <dt className="text-xl font-bold tabular-nums text-white sm:text-2xl">
+                  {stat.value}
+                </dt>
+                <dd className="mt-1 text-xs text-white/60">{stat.label}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
-
-        <h1 className="mt-6 max-w-3xl text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
-          <span className="text-brand">{siteConfig.slogan}</span>
-        </h1>
-        <p className="mt-5 max-w-xl text-base text-background/70 sm:text-lg">
-          {siteConfig.description}
-        </p>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Button
-            size="lg"
-            className="bg-brand text-brand-foreground hover:bg-brand/90"
-            nativeButton={false}
-            render={<Link href="/araclarimiz" />}
-          >
-            Araçlarımızı İncele
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-          <ValuationDialogTrigger
-            size="lg"
-            variant="outline"
-            className="border-background/20 bg-transparent text-background hover:bg-background/10 hover:text-background"
-          >
-            Aracımı Değerle
-          </ValuationDialogTrigger>
-          <Button
-            size="lg"
-            variant="ghost"
-            className="text-background hover:bg-background/10 hover:text-background"
-            nativeButton={false}
-            render={
-              <a
-                href={buildWhatsAppUrl(
-                  "Merhaba, Emirhan Otomotiv hakkında bilgi almak istiyorum."
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-              />
-            }
-          >
-            WhatsApp&apos;tan Ulaş
-          </Button>
-        </div>
-
-        <dl className="mt-14 grid max-w-2xl grid-cols-3 gap-6 border-t border-background/10 pt-8">
-          {STATS.map((stat) => (
-            <div key={stat.label}>
-              <dt className="text-2xl font-bold sm:text-3xl">{stat.value}</dt>
-              <dd className="mt-1 text-xs text-background/60 sm:text-sm">
-                {stat.label}
-              </dd>
-            </div>
-          ))}
-        </dl>
       </div>
     </section>
   );

@@ -39,14 +39,14 @@ export function VehicleSpecs({ vehicle }: { vehicle: SpecsSource }) {
   ];
 
   return (
-    <dl className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
+    <dl className="grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2">
       {specs.map((spec) => (
         <div
           key={spec.label}
-          className="flex items-center justify-between border-b border-border/60 py-2 text-sm"
+          className="flex items-center justify-between rounded-md border-b border-border/60 px-2 py-2.5 text-sm transition-colors hover:bg-card"
         >
           <dt className="text-muted-foreground">{spec.label}</dt>
-          <dd className="font-medium">{spec.value}</dd>
+          <dd className="font-medium tabular-nums">{spec.value}</dd>
         </div>
       ))}
     </dl>

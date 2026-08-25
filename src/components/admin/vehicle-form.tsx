@@ -29,6 +29,7 @@ type FormState = {
   year: string;
   mileage: string;
   price: string;
+  previousPrice: string;
   category: VehicleCategory | "";
   engine: string;
   engineDisplacement: string;
@@ -50,6 +51,7 @@ type FormState = {
   damageStatus: "yok" | "var";
   damageInfo: string;
   expertiseReportUrl: string;
+  videoUrl: string;
   features: string[];
   images: UploadedImage[];
 };
@@ -60,6 +62,7 @@ const EMPTY_STATE: FormState = {
   year: String(new Date().getFullYear()),
   mileage: "",
   price: "",
+  previousPrice: "",
   category: "",
   engine: "",
   engineDisplacement: "",
@@ -81,6 +84,7 @@ const EMPTY_STATE: FormState = {
   damageStatus: "yok",
   damageInfo: "",
   expertiseReportUrl: "",
+  videoUrl: "",
   features: [],
   images: [],
 };
@@ -174,6 +178,7 @@ export function VehicleForm({
       year: Number(values.year),
       mileage: Number(values.mileage),
       price: Number(values.price),
+      previousPrice: values.previousPrice ? Number(values.previousPrice) : null,
       category: values.category as VehicleCategory,
       engine: nullIfEmpty(values.engine),
       engineDisplacement: nullIfEmpty(values.engineDisplacement),
@@ -195,10 +200,12 @@ export function VehicleForm({
       damageStatus: values.damageStatus,
       damageInfo: nullIfEmpty(values.damageInfo),
       expertiseReportUrl: nullIfEmpty(values.expertiseReportUrl),
+      videoUrl: nullIfEmpty(values.videoUrl),
       features: values.features,
       images: values.images.map((image) => ({
         url: image.url,
         altText: image.altText || null,
+        category: image.category || null,
       })),
     };
 
@@ -286,6 +293,16 @@ export function VehicleForm({
               value={values.price}
               onChange={(e) => update("price", e.target.value)}
               required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="previousPrice">Önceki Fiyat (TL)</Label>
+            <Input
+              id="previousPrice"
+              type="number"
+              value={values.previousPrice}
+              onChange={(e) => update("previousPrice", e.target.value)}
+              placeholder="Fiyat düştüyse eski fiyatı girin"
             />
           </div>
           <div className="space-y-1.5">
@@ -627,6 +644,15 @@ export function VehicleForm({
           onChange={(images) => update("images", images)}
           folder="vehicles"
         />
+        <div className="space-y-1.5">
+          <Label htmlFor="videoUrl">Video Bağlantısı (YouTube)</Label>
+          <Input
+            id="videoUrl"
+            value={values.videoUrl}
+            onChange={(e) => update("videoUrl", e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=..."
+          />
+        </div>
       </section>
 
       <div className="flex items-center gap-3">

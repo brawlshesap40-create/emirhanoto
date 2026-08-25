@@ -28,6 +28,7 @@ export default async function EditVehiclePage({
     year: String(vehicle.year),
     mileage: String(vehicle.mileage),
     price: String(vehicle.price),
+    previousPrice: vehicle.previousPrice ? String(vehicle.previousPrice) : "",
     category: vehicle.category,
     engine: vehicle.engine ?? "",
     engineDisplacement: vehicle.engineDisplacement ?? "",
@@ -49,10 +50,12 @@ export default async function EditVehiclePage({
     damageStatus: vehicle.damageStatus,
     damageInfo: vehicle.damageInfo ?? "",
     expertiseReportUrl: vehicle.expertiseReportUrl ?? "",
+    videoUrl: vehicle.videoUrl ?? "",
     features: vehicle.features.map((f) => f.label),
     images: vehicle.images.map((image) => ({
       url: image.url,
       altText: image.altText ?? "",
+      category: image.category ?? "",
     })),
   };
 

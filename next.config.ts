@@ -26,12 +26,26 @@ function s3PublicUrlPattern() {
 
 const remotePattern = s3PublicUrlPattern();
 
+const UNSPLASH_PATTERN = {
+  protocol: "https" as const,
+  hostname: "images.unsplash.com",
+};
+
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns:
-      remotePattern && remotePattern.hostname !== "localhost"
+    remotePatterns: [
+      ...(remotePattern && remotePattern.hostname !== "localhost"
         ? [remotePattern]
-        : [LOCAL_MINIO_PATTERN],
+        : [LOCAL_MINIO_PATTERN]),
+      UNSPLASH_PATTERN,
+    ],
+  },
+  experimental: {
+    serverActions: {
+      // Araç/kiralama formlarında sınırsız sayıda fotoğraf eklenebilsin diye
+      // varsayılan 1mb server action gövde limitini yükseltiyoruz.
+      bodySizeLimit: "10mb",
+    },
   },
 };
 

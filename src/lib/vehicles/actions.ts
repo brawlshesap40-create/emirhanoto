@@ -8,6 +8,7 @@ import { vehicleFeatures, vehicleImages, vehicles } from "@/lib/db/schema";
 import { verifySession } from "@/lib/auth/dal";
 import { vehicleInputSchema, type VehicleInput } from "@/lib/validation/vehicle";
 import { generateVehicleSlug } from "./slug";
+import { getVehiclesByIds } from "./queries";
 
 function revalidatePublicPaths(slug?: string) {
   revalidatePath("/");
@@ -31,6 +32,7 @@ export async function createVehicleAction(input: VehicleInput) {
         vehicleId: vehicle.id,
         url: image.url,
         altText: image.altText,
+        category: image.category ?? null,
         sortOrder: index,
       }))
     );
@@ -64,6 +66,7 @@ export async function updateVehicleAction(id: number, input: VehicleInput) {
         vehicleId: id,
         url: image.url,
         altText: image.altText,
+        category: image.category ?? null,
         sortOrder: index,
       }))
     );
@@ -99,4 +102,8 @@ export async function setVehicleStatusAction(
     .where(eq(vehicles.id, id));
   revalidatePublicPaths();
   revalidatePath("/admin/vehicles");
+}
+
+export async function fetchVehiclesByIds(ids: number[]) {
+  return getVehiclesByIds(ids);
 }

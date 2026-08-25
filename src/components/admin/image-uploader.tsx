@@ -5,7 +5,18 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, ImagePlus, Loader2, X } from "lucide-react";
 
-export type UploadedImage = { url: string; altText: string };
+export type UploadedImage = {
+  url: string;
+  altText: string;
+  category?: string | null;
+};
+
+const CATEGORY_OPTIONS = [
+  { value: "", label: "Genel" },
+  { value: "dis", label: "Dış" },
+  { value: "ic", label: "İç" },
+  { value: "motor", label: "Motor" },
+];
 
 export function ImageUploader({
   images,
@@ -55,12 +66,18 @@ export function ImageUploader({
     onChange(next);
   }
 
+  function updateCategory(index: number, category: string) {
+    const next = [...images];
+    next[index] = { ...next[index], category: category || null };
+    onChange(next);
+  }
+
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         {images.map((image, index) => (
+          <div key={image.url + index} className="space-y-1.5">
           <div
-            key={image.url + index}
             className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-border bg-muted"
           >
             <Image
@@ -104,6 +121,18 @@ export function ImageUploader({
               </span>
             )}
           </div>
+          <select
+            value={image.category ?? ""}
+            onChange={(e) => updateCategory(index, e.target.value)}
+            className="h-7 w-full rounded-md border border-input bg-transparent px-2 text-xs outline-none focus-visible:border-ring"
+          >
+            {CATEGORY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          </div>
         ))}
 
         <button
@@ -129,7 +158,8 @@ export function ImageUploader({
         onChange={(e) => handleFiles(e.target.files)}
       />
       <p className="text-xs text-muted-foreground">
-        En az 1, önerilen 8+ fotoğraf. İlk fotoğraf kapak görseli olarak kullanılır.
+        En az 1 fotoğraf gereklidir, istediğiniz kadar ekleyebilirsiniz (sınır yoktur). İlk
+        fotoğraf kapak görseli olarak kullanılır.
       </p>
     </div>
   );
