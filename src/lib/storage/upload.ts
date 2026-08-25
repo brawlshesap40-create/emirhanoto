@@ -1,7 +1,7 @@
 import "server-only";
 import { randomUUID } from "crypto";
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3, S3_BUCKET, S3_PUBLIC_URL } from "./client";
+import { mkdir, unlink, writeFile } from "fs/promises";
+import path from "path";
 
 const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -17,6 +17,11 @@ const ALLOWED_DOCUMENT_TYPES = new Set([
 
 const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
+
+// public/uploads Next.js'in statik dosya sunucusu tarafından /uploads/*
+// altında doğrudan servis edilir (next start kalıcı bir süreç olduğu için
+// build sonrası eklenen dosyalar da çalışma zamanında diskten okunur).
+const UPLOADS_ROOT = path.join(process.cwd(), "public", "uploads");
 
 // Istemcinin beyan ettigi file.type sahtelenebilir; gercek icerigi ilk
 // birkac byte'a bakarak (magic number) dogruluyoruz.
@@ -88,26 +93,24 @@ async function uploadFile(
     throw new Error("Dosya icerigi beyan edilen turle eslesmiyor");
   }
 
-  const ext = file.name.split(".").pop() ?? "bin";
+  // Gercek dosya sistemine yaziliyor (S3'teki gibi duz bir "key" namespace'i
+  // degil), bu yuzden uzantiyi path traversal'a karsi sikica dogruluyoruz.
+  const rawExt = file.name.split(".").pop() ?? "";
+  const ext = /^[a-zA-Z0-9]{1,10}$/.test(rawExt) ? rawExt.toLowerCase() : "bin";
   const key = `${folder}/${randomUUID()}.${ext}`;
 
-  await s3.send(
-    new PutObjectCommand({
-      Bucket: S3_BUCKET,
-      Key: key,
-      Body: buffer,
-      ContentType: signature,
-    })
-  );
+  const destination = path.join(UPLOADS_ROOT, key);
+  await mkdir(path.dirname(destination), { recursive: true });
+  await writeFile(destination, buffer);
 
-  return { url: `${S3_PUBLIC_URL}/${key}`, key };
+  return { url: `/uploads/${key}`, key };
 }
 
 export async function deleteObject(key: string) {
-  await s3.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: key }));
+  await unlink(path.join(UPLOADS_ROOT, key)).catch(() => {});
 }
 
 export function keyFromUrl(url: string) {
-  if (!url.startsWith(S3_PUBLIC_URL)) return null;
-  return url.slice(S3_PUBLIC_URL.length + 1);
+  if (!url.startsWith("/uploads/")) return null;
+  return url.slice("/uploads/".length);
 }

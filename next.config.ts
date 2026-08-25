@@ -1,42 +1,12 @@
 import type { NextConfig } from "next";
 
-const LOCAL_MINIO_PATTERN = {
-  protocol: "http" as const,
-  hostname: "localhost",
-  port: "9000",
-  pathname: "/emirhanoto/**",
-};
-
-function s3PublicUrlPattern() {
-  const publicUrl = process.env.S3_PUBLIC_URL;
-  if (!publicUrl) return null;
-
-  try {
-    const url = new URL(publicUrl);
-    return {
-      protocol: url.protocol.replace(":", "") as "http" | "https",
-      hostname: url.hostname,
-      port: url.port || undefined,
-      pathname: `${url.pathname === "/" ? "" : url.pathname}/**`,
-    };
-  } catch {
-    return null;
-  }
-}
-
-const remotePattern = s3PublicUrlPattern();
-
-const UNSPLASH_PATTERN = {
-  protocol: "https" as const,
-  hostname: "images.unsplash.com",
-};
-
 const isDev = process.env.NODE_ENV === "development";
 
-// next/image serves optimized images through the same-origin /_next/image
-// proxy, so the browser never fetches S3/MinIO/Unsplash URLs directly —
-// but brand-strip.tsx renders external brand-logo images via plain <img>
-// tags (not next/image), so carlogos.org needs an explicit img-src entry.
+// Araç fotoğrafları artık aynı origin'deki /uploads/* altında sunucu
+// diskinden servis ediliyor, next/image bunun için ekstra remotePatterns
+// gerektirmiyor. brand-strip.tsx ise external marka logolarını plain <img>
+// (next/image değil) ile render ediyor, bu yüzden carlogos.org için ayrı
+// bir img-src izni gerekiyor.
 // The /iletisim page embeds a Google Maps iframe, so frame-src allows that
 // one external origin. Next.js injects its own inline hydration/RSC
 // bootstrap scripts with no nonce here, so script-src/style-src need
@@ -62,14 +32,6 @@ const cspHeader = `
 
 const nextConfig: NextConfig = {
   devIndicators: false,
-  images: {
-    remotePatterns: [
-      ...(remotePattern && remotePattern.hostname !== "localhost"
-        ? [remotePattern]
-        : [LOCAL_MINIO_PATTERN]),
-      UNSPLASH_PATTERN,
-    ],
-  },
   experimental: {
     serverActions: {
       // Araç/kiralama formlarında sınırsız sayıda fotoğraf eklenebilsin diye

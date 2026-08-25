@@ -1,13 +1,13 @@
 # Emirhan Otomotiv
 
-36 yıllık tecrübeye sahip Emirhan Otomotiv için geliştirilen araç alım satım platformu. Next.js (App Router) + PostgreSQL (Drizzle ORM) + S3 uyumlu dosya depolama ile gerçek işletme kullanımına uygun olarak inşa edildi.
+36 yıllık tecrübeye sahip Emirhan Otomotiv için geliştirilen araç alım satım platformu. Next.js (App Router) + PostgreSQL (Drizzle ORM) ile gerçek işletme kullanımına uygun olarak inşa edildi; araç fotoğrafları sunucu diskine yazılır.
 
 ## Teknoloji
 
 - **Next.js 16** (App Router, TypeScript, Server Actions)
 - **Tailwind CSS v4** + shadcn/ui
 - **PostgreSQL** + **Drizzle ORM**
-- **S3 uyumlu depolama** (local: MinIO, production: AWS S3 / Cloudflare R2 vb.)
+- Yerel disk depolama (`public/uploads`) — araç fotoğrafları ve döküman yüklemeleri
 - Özel, hafif oturum (session) tabanlı admin authentication (bcrypt + jose/JWT)
 
 ## Local Geliştirme Ortamı
@@ -15,7 +15,7 @@
 ### 1. Gereksinimler
 
 - Node.js 20.9+
-- Docker Desktop (Postgres ve MinIO local'de container olarak çalışır)
+- Docker Desktop (Postgres local'de container olarak çalışır)
 
 ### 2. Ortam değişkenleri
 
@@ -31,7 +31,7 @@ cp .env.example .env.local
 docker compose up -d
 ```
 
-Bu komut Postgres'i (`localhost:5432`) ve MinIO'yu (`localhost:9000`, konsol: `localhost:9001`) ayağa kaldırır.
+Bu komut Postgres'i `localhost:5432`'de ayağa kaldırır.
 
 ### 4. Bağımlılıkları kur
 
@@ -45,13 +45,7 @@ npm install
 npm run db:migrate
 ```
 
-### 6. MinIO bucket'ını oluştur (ilk kurulumda bir kez)
-
-```bash
-npx tsx --env-file=.env.local scripts/setup-storage.ts
-```
-
-### 7. Örnek veriyi yükle (admin kullanıcı + 15 demo araç)
+### 6. Örnek veriyi yükle (admin kullanıcı + 15 demo araç)
 
 ```bash
 npm run db:seed
@@ -61,7 +55,7 @@ npm run db:seed
 
 > Not: Demo araçların gerçek fotoğrafı yoktur (fabrikasyon stok fotoğrafı eklenmedi). Admin panelinden gerçek araç fotoğraflarını yükleyebilirsiniz.
 
-### 8. Geliştirme sunucusunu başlat
+### 7. Geliştirme sunucusunu başlat
 
 ```bash
 npm run dev
@@ -96,46 +90,57 @@ src/
   lib/
     db/                 Drizzle şeması ve client
     auth/               Oturum yönetimi (jose/JWT), server action'lar
-    storage/            S3 client ve yükleme yardımcıları
+    storage/            Yerel disk yükleme yardımcıları (public/uploads)
     vehicles/           Sorgular, server action'lar, sabitler
   proxy.ts              Next.js 16 "proxy" dosyası - /admin/* rota koruması
 ```
 
-## Yayına Alma (Production)
+## Yayına Alma (Production — FastPanel / VPS)
 
-Önerilen yol: **Vercel** (hosting) + **Neon** veya **Supabase** (Postgres) + **Cloudflare R2** (S3 uyumlu görsel/döküman depolama). Kod bu üçlüye hazır yazıldı; local'de MinIO yerine sadece env değişkenleri değişir, kod değişikliği gerekmez.
+Bu proje kendi sunucunuzda (FastPanel panelli bir VPS) çalışacak şekilde yapılandırıldı: Postgres sunucuda local olarak kurulur, araç fotoğrafları da `public/uploads` altında sunucu diskine yazılır — S3/Vercel gerekmez.
 
-### 1. GitHub'a push
+### 1. Sunucuda Postgres
 
-Vercel bir Git deposundan deploy eder. Projeyi kendi GitHub hesabınızda bir repoya push edin (`git remote add origin ...` + `git push -u origin master`).
+FastPanel → Databases bölümünden bir Postgres veritabanı + kullanıcı oluşturun. Uygulama aynı sunucuda çalışacağı için bağlantı `localhost` üzerinden olur:
 
-### 2. Veritabanı (Neon veya Supabase)
+```
+DATABASE_URL=postgresql://KULLANICI:SIFRE@localhost:5432/VERITABANI_ADI
+```
 
-1. [neon.tech](https://neon.tech) veya [supabase.com](https://supabase.com)'da ücretsiz bir proje oluşturun.
-2. Verilen `DATABASE_URL`'i (SSL zorunlu, `?sslmode=require` içerir) not edin.
-3. Local makinenizden bu URL'e karşı migration'ları çalıştırın ve **sadece admin kullanıcıyı** oluşturun (demo araçlar olmadan):
-   ```bash
-   DATABASE_URL="<neon-connection-string>" npx drizzle-kit migrate
-   DATABASE_URL="<neon-connection-string>" SEED_ADMIN_EMAIL="..." SEED_ADMIN_PASSWORD="..." SEED_SKIP_VEHICLES=true npx tsx scripts/seed.ts
-   ```
+### 2. Kodu sunucuya alma
 
-### 3. Görsel depolama (Cloudflare R2)
+Repoyu sunucuya çekin (`git clone` veya FastPanel'in Git deploy özelliği) ve proje kökünde bir `.env` (veya `.env.production.local`) dosyası oluşturup değerleri girin: `DATABASE_URL`, `SESSION_SECRET` (`openssl rand -base64 32` ile üretin), `NEXT_PUBLIC_SITE_URL` (gerçek domain), `NEXT_PUBLIC_WHATSAPP_NUMBER`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`.
 
-1. Cloudflare hesabınızda bir R2 bucket oluşturun (örn. `emirhanoto`).
-2. Bucket için "Public access" açın veya bir custom domain (örn. `cdn.emirhanotomotiv.com`) bağlayın — bu, `S3_PUBLIC_URL` olacak.
-3. R2 API token'ı oluşturun (Access Key ID / Secret) ve bucket'ı local'deki gibi oluşturmak için:
-   ```bash
-   S3_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com" S3_REGION=auto S3_ACCESS_KEY_ID="..." S3_SECRET_ACCESS_KEY="..." S3_BUCKET=emirhanoto S3_FORCE_PATH_STYLE=true npx tsx scripts/setup-storage.ts
-   ```
+### 3. Bağımlılık kurulumu + build
 
-### 4. Vercel'e deploy
+```bash
+npm install
+npm run build
+```
 
-1. [vercel.com](https://vercel.com)'da GitHub reponuzu import edin.
-2. Environment Variables kısmına `.env.example`'daki değişkenleri **production değerleriyle** girin: `DATABASE_URL` (Neon/Supabase), `SESSION_SECRET` (yeni bir tane üretin), `S3_*` (R2 bilgileri), `NEXT_PUBLIC_SITE_URL` (gerçek domain), `NEXT_PUBLIC_WHATSAPP_NUMBER`. `SEED_ADMIN_*` değişkenlerini Vercel'e eklemenize gerek yok, sadece local'den seed çalıştırırken kullanılıyor.
-3. Deploy edin. Vercel otomatik HTTPS sağlar.
-4. Kendi domaininizi (örn. emirhanotomotiv.com) Vercel proje ayarlarından bağlayın.
+### 4. Migration + admin kullanıcı
 
-> Not: Hesap oluşturma, domain satın alma ve gerçek API anahtarlarını girme adımları kendi hesaplarınızda yapılmalıdır. Bu adımlarda takılırsanız hangi ekranda olduğunuzu söyleyin, birlikte ilerleriz.
+```bash
+npm run db:migrate
+SEED_SKIP_VEHICLES=true npm run db:seed
+```
+
+(`SEED_SKIP_VEHICLES=true` demo araçları eklemeden sadece admin kullanıcıyı oluşturur.)
+
+### 5. Uygulamayı çalıştırma
+
+FastPanel'in Node.js App bölümünde:
+- Başlangıç dosyası / komut: `npm start` (bu `next start` çalıştırır, `next build` sonrasını sunar)
+- Uygulama kök dizini: proje klasörü
+- FastPanel bir port atar ve Nginx reverse-proxy ile domain'e bağlar
+
+`public/uploads` klasörünün yazılabilir olduğundan ve yedeklerinize dahil edildiğinden emin olun — kullanıcıların yüklediği araç fotoğrafları burada tutulur.
+
+### 6. SSL/domain
+
+FastPanel genelde Let's Encrypt sertifikasını domain bağlarken otomatik sağlar.
+
+> Not: Sunucu erişimi, domain bağlama ve panel arayüzündeki adımlar kendi hesabınızda yapılmalıdır. Bir ekranda takılırsanız hangi adımda olduğunuzu söyleyin, birlikte ilerleriz.
 
 ## Kapsam Durumu (Faz 1)
 
