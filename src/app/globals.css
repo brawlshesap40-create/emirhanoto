@@ -134,12 +134,6 @@
   body {
     @apply bg-background text-foreground;
     letter-spacing: 0.02em;
-    background-image: radial-gradient(
-      ellipse 1200px 600px at 50% -10%,
-      color-mix(in oklch, var(--brand), transparent 88%),
-      transparent
-    );
-    background-repeat: no-repeat;
     font-feature-settings: "cv11", "ss01";
   }
   ::selection {

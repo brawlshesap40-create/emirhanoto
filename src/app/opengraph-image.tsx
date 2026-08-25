@@ -30,7 +30,7 @@ export default async function Image() {
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logoSrc} width={160} height={170} alt="" />
+        <img src={logoSrc} width={140} height={140} alt="" />
         <div style={{ display: "flex", marginTop: 40, fontSize: 64, fontWeight: 700 }}>
           {siteConfig.name}
         </div>

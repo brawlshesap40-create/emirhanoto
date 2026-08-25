@@ -6,7 +6,7 @@ import { buildWhatsAppUrl, siteConfig } from "@/lib/site-config";
 export function CtaBanner() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
-      <div className="relative overflow-hidden rounded-3xl bg-[linear-gradient(120deg,var(--brand)_0%,oklch(0.32_0.05_150)_100%)] px-6 py-12 text-center sm:px-12 sm:py-16">
+      <div className="relative overflow-hidden rounded-3xl bg-brand px-6 py-12 text-center sm:px-12 sm:py-16">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.08]"
           style={{

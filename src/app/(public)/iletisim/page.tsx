@@ -72,13 +72,13 @@ export default function ContactPage() {
                   </a>
                 </div>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex min-w-0 items-start gap-3">
                 <Mail className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-semibold">E-posta</p>
                   <a
                     href={`mailto:${siteConfig.email}`}
-                    className="text-sm text-muted-foreground hover:text-foreground"
+                    className="break-all text-sm text-muted-foreground hover:text-foreground"
                   >
                     {siteConfig.email}
                   </a>

@@ -74,10 +74,10 @@ export function Footer() {
             </a>
             <a
               href={`mailto:${siteConfig.email}`}
-              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/70 transition-colors hover:border-brand/40 hover:text-white"
+              className="flex min-w-0 items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/70 transition-colors hover:border-brand/40 hover:text-white"
             >
               <Mail className="h-4 w-4 shrink-0 text-brand" />
-              {siteConfig.email}
+              <span className="min-w-0 break-all">{siteConfig.email}</span>
             </a>
             <div className="flex items-start gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/70">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
