@@ -23,7 +23,7 @@ export function ContactMessageForm() {
 
   if (state.status === "success") {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card p-8 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card shadow-sm p-8 text-center">
         <CheckCircle2 className="h-9 w-9 text-emerald-600" />
         <p className="font-medium">Mesajınız alındı.</p>
         <p className="text-sm text-muted-foreground">
@@ -34,7 +34,7 @@ export function ContactMessageForm() {
   }
 
   return (
-    <form action={action} className="space-y-4 rounded-xl border border-border bg-card p-6">
+    <form action={action} className="space-y-4 rounded-2xl border border-border bg-card shadow-sm p-6">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         Mesaj Bırakın
       </h2>

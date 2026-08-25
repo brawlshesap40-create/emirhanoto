@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Award, Car, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ValuationDialogTrigger } from "@/components/site/valuation-dialog";
 import { siteConfig } from "@/lib/site-config";
 
 const STATS = [
-  { value: "36 Yıl", label: "Sektör Tecrübesi" },
-  { value: "15+", label: "Güncel Araç Stoku" },
-  { value: "750K - 5M ₺", label: "Fiyat Aralığı" },
+  { icon: Award, value: "36 Yıl", label: "Sektör Tecrübesi" },
+  { icon: Car, value: "15+", label: "Güncel Araç Stoku" },
+  { icon: Wallet, value: "750K - 5M ₺", label: "Fiyat Aralığı" },
 ];
 
 export function Hero() {
@@ -57,13 +57,21 @@ export function Hero() {
             </ValuationDialogTrigger>
           </div>
 
-          <dl className="mt-10 grid grid-cols-3 divide-x divide-white/20 border-t border-white/20 pt-6">
+          <dl className="mt-10 flex flex-wrap gap-3">
             {STATS.map((stat) => (
-              <div key={stat.label} className="px-4 first:pl-0">
-                <dt className="text-xl font-bold tabular-nums text-white sm:text-2xl">
-                  {stat.value}
-                </dt>
-                <dd className="mt-1 text-xs text-white/60">{stat.label}</dd>
+              <div
+                key={stat.label}
+                className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-md"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/90 text-brand-foreground">
+                  <stat.icon className="h-4 w-4" />
+                </span>
+                <div>
+                  <dt className="text-base font-bold tabular-nums text-white sm:text-lg">
+                    {stat.value}
+                  </dt>
+                  <dd className="text-[11px] text-white/65">{stat.label}</dd>
+                </div>
               </div>
             ))}
           </dl>

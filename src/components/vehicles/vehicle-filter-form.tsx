@@ -289,7 +289,7 @@ export function VehicleFilterForm({
         </Sheet>
       </div>
 
-      <aside className="hidden rounded-xl border border-border bg-card p-5 lg:block lg:h-fit">
+      <aside className="hidden rounded-2xl border border-border bg-card shadow-sm p-5 lg:block lg:h-fit">
         <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           <span className="h-1.5 w-1.5 rounded-full bg-brand" />
           Filtreler

@@ -27,9 +27,9 @@ export function CategoryShortcuts() {
             <Link
               key={value}
               href={`/araclarimiz?category=${value}`}
-              className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-4 py-6 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-[0_16px_40px_-20px_rgba(0,0,0,0.7)]"
+              className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card px-4 py-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand/30 hover:shadow-[0_20px_44px_-20px_rgba(0,0,0,0.35)]"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors duration-300 group-hover:bg-brand group-hover:text-brand-foreground">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-brand transition-colors duration-300 group-hover:bg-brand group-hover:text-brand-foreground">
                 <Icon className="h-5 w-5" />
               </span>
               <span className="text-sm font-medium">{label}</span>

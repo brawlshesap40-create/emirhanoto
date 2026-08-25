@@ -23,7 +23,7 @@ export function StockAlertForm() {
 
   if (state.status === "success") {
     return (
-      <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-5 text-sm">
+      <div className="flex items-center gap-3 rounded-2xl border border-border bg-card shadow-sm p-5 text-sm">
         <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
         <p>Kaydınız alındı, uygun araç geldiğinde sizi bilgilendireceğiz.</p>
       </div>
@@ -33,7 +33,7 @@ export function StockAlertForm() {
   return (
     <form
       action={action}
-      className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5 sm:flex-row sm:items-end"
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-card shadow-sm p-5 sm:flex-row sm:items-end"
     >
       <div className="flex items-start gap-2 sm:w-56">
         <BellPlus className="mt-2 h-4 w-4 shrink-0 text-brand" />

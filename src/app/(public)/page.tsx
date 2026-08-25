@@ -6,6 +6,7 @@ import { FeaturedVehiclesSection } from "@/components/vehicles/featured-vehicles
 import { BrandStrip } from "@/components/site/brand-strip";
 import { ServicesSection } from "@/components/site/services-section";
 import { FaqSection } from "@/components/site/faq-section";
+import { CtaBanner } from "@/components/site/cta-banner";
 import { buildOrganizationJsonLd, siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -33,6 +34,7 @@ export default function HomePage() {
       <BrandStrip />
       <ServicesSection />
       <FaqSection />
+      <CtaBanner />
     </>
   );
 }

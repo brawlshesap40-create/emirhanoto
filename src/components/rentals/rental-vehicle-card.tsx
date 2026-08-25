@@ -24,7 +24,7 @@ export function RentalVehicleCard({ vehicle }: { vehicle: RentalVehicleCardData 
   const image = vehicle.images[0];
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-brand/30 hover:shadow-[0_0_0_1px_color-mix(in_oklch,var(--brand),transparent_75%),0_16px_40px_-16px_rgba(0,0,0,0.7)]">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand/30 hover:shadow-[0_0_0_1px_color-mix(in_oklch,var(--brand),transparent_75%),0_16px_40px_-16px_rgba(0,0,0,0.7)]">
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         {image ? (
           <Image

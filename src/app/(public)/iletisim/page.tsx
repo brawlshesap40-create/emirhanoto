@@ -49,7 +49,7 @@ export default function ContactPage() {
 
       <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <div className="space-y-6">
-          <div className="rounded-xl border border-border bg-card p-6">
+          <div className="rounded-2xl border border-border bg-card shadow-sm p-6">
             <ul className="space-y-5">
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand" />

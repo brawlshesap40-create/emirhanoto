@@ -176,7 +176,7 @@ export default async function VehicleDetailPage({
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="rounded-2xl border border-border bg-card shadow-sm p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm text-muted-foreground">Fiyat</p>

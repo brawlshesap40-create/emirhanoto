@@ -49,7 +49,7 @@ export function FaqSection() {
         description="Aklınıza takılan bir şey mi var? Aşağıda bulamazsanız bize doğrudan ulaşabilirsiniz."
       />
 
-      <Accordion className="mt-8 overflow-hidden rounded-xl border border-border bg-card px-5 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.8)]">
+      <Accordion className="mt-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm px-5 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.8)]">
         {FAQS.map((faq, index) => (
           <AccordionItem key={faq.question} value={faq.question}>
             <AccordionTrigger className="gap-4">

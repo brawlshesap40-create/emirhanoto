@@ -30,7 +30,7 @@ export default function GlobalError({
               fontSize: 12,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: "#e9302c",
+              color: "#a7003b",
               marginBottom: 12,
             }}
           >
@@ -46,7 +46,7 @@ export default function GlobalError({
           <button
             onClick={reset}
             style={{
-              background: "#e9302c",
+              background: "#a7003b",
               color: "#fff",
               border: "none",
               borderRadius: 999,

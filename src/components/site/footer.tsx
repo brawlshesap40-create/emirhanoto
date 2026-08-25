@@ -64,34 +64,30 @@ export function Footer() {
 
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-white">İletişim</h3>
-          <ul className="space-y-2 text-sm text-white/60">
-            <li className="flex items-start gap-2">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
-              <span>{siteConfig.address}</span>
-            </li>
-            <li className="flex items-center gap-2">
+          <div className="grid grid-cols-1 gap-2">
+            <a
+              href={siteConfig.phoneHref}
+              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/70 transition-colors hover:border-brand/40 hover:text-white"
+            >
               <Phone className="h-4 w-4 shrink-0 text-brand" />
-              <a
-                href={siteConfig.phoneHref}
-                className="transition-colors hover:text-white"
-              >
-                {siteConfig.phoneDisplay}
-              </a>
-            </li>
-            <li className="flex items-center gap-2">
+              {siteConfig.phoneDisplay}
+            </a>
+            <a
+              href={`mailto:${siteConfig.email}`}
+              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/70 transition-colors hover:border-brand/40 hover:text-white"
+            >
               <Mail className="h-4 w-4 shrink-0 text-brand" />
-              <a
-                href={`mailto:${siteConfig.email}`}
-                className="transition-colors hover:text-white"
-              >
-                {siteConfig.email}
-              </a>
-            </li>
-            <li className="flex items-center gap-2">
+              {siteConfig.email}
+            </a>
+            <div className="flex items-start gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/70">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+              {siteConfig.address}
+            </div>
+            <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/70">
               <Clock className="h-4 w-4 shrink-0 text-brand" />
-              <span>Her gün {siteConfig.workingHours}</span>
-            </li>
-          </ul>
+              Her gün {siteConfig.workingHours}
+            </div>
+          </div>
         </div>
       </div>
       <div className="border-t border-white/10 py-4 text-center text-xs text-white/40">

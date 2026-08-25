@@ -40,7 +40,7 @@ export default async function Image() {
             marginTop: 18,
             fontSize: 34,
             fontWeight: 600,
-            color: "#E9302C",
+            color: "#a7003b",
           }}
         >
           {siteConfig.slogan}

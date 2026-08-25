@@ -32,7 +32,7 @@ export async function FeaturedVehiclesSection() {
 
       <Link
         href={`/araclarimiz/${spotlight.slug}`}
-        className="group mb-6 grid grid-cols-1 overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-brand/30 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] lg:grid-cols-2"
+        className="group mb-6 grid grid-cols-1 overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:border-brand/30 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] lg:grid-cols-2"
       >
         <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted lg:aspect-auto">
           {spotlightImage ? (

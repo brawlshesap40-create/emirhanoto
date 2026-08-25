@@ -148,7 +148,7 @@ export default async function RentalVehicleDetailPage({
             </p>
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="rounded-2xl border border-border bg-card shadow-sm p-5">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
                 <p className="text-sm text-muted-foreground">Günlük</p>
