@@ -34,8 +34,7 @@ export function CtaBanner() {
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              className="bg-[#25D366] text-white shadow-lg hover:bg-[#1ebe5d]"
               nativeButton={false}
               render={
                 <a
